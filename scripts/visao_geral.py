@@ -159,6 +159,7 @@ def map_(df):
         
     folium_static(map_,width=1024,height=600)
 
+
 def cuisines_map(df):
     center_coordinates = get_country_center_coordinates(selected_country)
     
@@ -476,9 +477,6 @@ def avg_map(df):
     avg_map.get_root().html.add_child(folium.Element(legend_html))
     folium_static(avg_map,width=1024,height=600)
 
-# def create_map_based_on_country(df, selected_country):
-#     filtered_df = df[df['country'] == selected_country]
-    
 # load dataset
 df_raw=pd.read_csv('../data/zomato_raw.csv')
 
