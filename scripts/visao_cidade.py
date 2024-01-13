@@ -158,14 +158,126 @@ st.sidebar.markdown('# Eat Well Company')
 st.sidebar.markdown("""---""")
 
 
-tab1,tab2=st.tabs(['Management Vision',' '])
+tab1,tab2=st.tabs(['Management Vision','Full tables'])
 
 with tab1:
     with st.container():
 
         col1,col2=st.columns(2)
         with col1:
-            st.markdown("<h4 style='text-align: left;'>Most variety of restaurants</h4>",unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: left;'>Variety of restaurants</h4>",unsafe_allow_html=True)
+            df1=df.drop_duplicates(subset=['restaurant_name'])
+            df1=(df1[['city','country','restaurant_name']].groupby(['city','country'])
+                                                         .count()
+                                                         .sort_values('restaurant_name',ascending=False)
+                                                         .rename(columns={'restaurant_name':'restaurants'})
+                                                         .reset_index()
+                                                         .head(12))
+            
+            fig=px.histogram(df1, x='restaurants', y='city', hover_data='country', color="country",
+                                                             category_orders={'city': df1['city'].tolist()})
+            
+            fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                              legend_title_text='',height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+
+        with col2:
+            st.markdown("<h4 style='text-align: left;'>Variety of cuisines</h4>",unsafe_allow_html=True)
+            list=df['cuisines'].str.split(',',expand=True)
+            list= list.replace(',','', regex=True)
+            list= list.replace(' ','', regex=True)
+            list[['city','country']]=df[['city','country']]
+            list.fillna('empty', inplace=True)
+            list=list.drop_duplicates(ignore_index=True)
+            
+            list['Combined'] = list[0].astype(str) +','+ list[1] +','+list[2]+','+list[3]+','+list[4]+','+list[5]+','+list[6]+','+list[7] 
+            
+            list= list.replace(',empty','', regex=True)
+            list=list[['Combined','city','country']]
+            list=list.assign(var1=list['Combined'].str.split(',')).explode('var1')
+            list=list.drop(columns=['Combined'])
+            list=list.drop_duplicates(ignore_index=True)
+            df1=(list[['city','country','var1']].groupby(['city','country'])
+                                                .count()
+                                                .sort_values('var1',ascending=False)
+                                                .rename(columns={'var1':'cuisines'})
+                                                .reset_index()
+                                                .head(12))
+
+            fig=px.histogram(df1, x='cuisines', y='city', hover_data='country', color="country",
+                                                             category_orders={'city': df1['city'].tolist()})
+            
+            fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+
+    with st.container():
+
+        col1,col2=st.columns(2)
+        with col1:  
+            st.markdown("<h4 style='text-align:left;margin-top: 0px;'>Ratings above 4.5</h4>",unsafe_allow_html=True)
+            
+            df1=df[df['aggregate_rating']>4.5]
+            df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index()  # total de restaurantes por cidade
+            
+            df_merged = pd.merge(df2, df1[['city', 'country', 'restaurant_id']]
+                                .groupby(['city', 'country'])
+                                 .count()
+                                 .reset_index(), on=['city', 'country'], how='left', suffixes=('_total', '_rating_above_4_5'))
+            
+            # cidades sem restaurantes com nota abaixo de 4 
+            df_merged['restaurant_id_rating_above_4_5'] = df_merged['restaurant_id_rating_above_4_5'].fillna(0).astype(int)  
+            
+            df_merged['proportion_rating_above_4_5'] = df_merged['restaurant_id_rating_above_4_5'] / df_merged['restaurant_id_total']
+            
+            df1 = (df_merged.sort_values('restaurant_id_rating_above_4_5', ascending=False)
+                            .rename(columns={'restaurant_id_total':'restaurants',
+                                             'restaurant_id_rating_above_4_5':'rating_above_4_5',
+                                             'proportion_rating_above_4_5':'proportion'})
+                            .reset_index())
+            
+            df1['proportion'] = (df1['proportion'] * 100).round(2)
+            df1=df1[(df1['rating_above_4_5']>0) & (df1['restaurants']>10)]
+            df1=df1[['city', 'country', 'proportion']]
+            
+            st.dataframe(df1)
+                
+        with col2:
+            st.markdown("<h4 style='text-align:left;margin-top: 0px;'>Ratings below 4</h4>",unsafe_allow_html=True)
+            df1 = df[(df['aggregate_rating']<4.0) & (df['votes']>3)]
+            df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index() 
+            
+            df_merged = pd.merge(df2, df1[['city', 'country', 'restaurant_id']]
+                                .groupby(['city', 'country'])
+                                 .count()
+                                 .reset_index(), on=['city', 'country'], how='left', suffixes=('_total', '_rating_below_4'))
+            
+            df_merged['restaurant_id_rating_below_4'] = df_merged['restaurant_id_rating_below_4'].fillna(0).astype(int)  
+            
+            df_merged['proportion_rating_below_4'] = df_merged['restaurant_id_rating_below_4'] / df_merged['restaurant_id_total']
+            
+            df1 = (df_merged.sort_values('proportion_rating_below_4', ascending=False)
+                            .rename(columns={'restaurant_id_total':'restaurants',
+                                             'restaurant_id_rating_below_4':'rating_below_4',
+                                             'proportion_rating_below_4':'proportion'})
+                            .reset_index())
+            
+            df1['proportion'] = (df1['proportion'] * 100).round(2)
+            df1=df1[df1['rating_below_4']>0]
+            df1=df1[['city', 'country','proportion']]
+
+            st.dataframe(df1)
+            # st.markdown("""---""")
+
+with tab2:
+    with st.container():
+
+        col1,col2=st.columns(2)
+        with col1:
+            st.markdown("<h4 style='text-align: left;'>Variety of restaurants</h4>",unsafe_allow_html=True)
             df1=df.drop_duplicates(subset=['restaurant_name'])
             df1=(df1[['city','country','restaurant_name']].groupby(['city','country'])
                                                          .count()
@@ -176,7 +288,7 @@ with tab1:
             st.dataframe(df1)
                 
         with col2:
-            st.markdown("<h4 style='text-align: left;'>Most variety of cuisines</h4>",unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: left;'>Variety of cuisines</h4>",unsafe_allow_html=True)
             list=df['cuisines'].str.split(',',expand=True)
             list= list.replace(',','', regex=True)
             list= list.replace(' ','', regex=True)
@@ -202,30 +314,60 @@ with tab1:
     with st.container():
 
         col1,col2=st.columns(2)
-        with col1:
-            st.markdown("<h4 style='text-align:left;margin-top: 0px;'>Most restaurants with ratings above 4.5</h4>",unsafe_allow_html=True)
+        with col1:  
+            st.markdown("<h4 style='text-align:left;margin-top: 0px;'>Ratings above 4.5</h4>",unsafe_allow_html=True)
+            
             df1=df[df['aggregate_rating']>4.5]
-            df1=(df1[['city','country','restaurant_id']].groupby(['city','country'])
-                                                        .count()
-                                                        .sort_values('restaurant_id',ascending=False)
-                                                        .rename(columns={'restaurant_id':'restaurants'})
-                                                        .reset_index())
-                                                        # .head(10))
+            df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index()  # total de restaurantes por cidade
+            
+            df_merged = pd.merge(df2, df1[['city', 'country', 'restaurant_id']]
+                                .groupby(['city', 'country'])
+                                 .count()
+                                 .reset_index(), on=['city', 'country'], how='left', suffixes=('_total', '_rating_above_4_5'))
+            
+            # cidades sem restaurantes com nota abaixo de 4 
+            df_merged['restaurant_id_rating_above_4_5'] = df_merged['restaurant_id_rating_above_4_5'].fillna(0).astype(int)  
+            
+            df_merged['proportion_rating_above_4_5'] = df_merged['restaurant_id_rating_above_4_5'] / df_merged['restaurant_id_total']
+            
+            df1 = (df_merged.sort_values('restaurant_id_rating_above_4_5', ascending=False)
+                            .rename(columns={'restaurant_id_total':'restaurants',
+                                             'restaurant_id_rating_above_4_5':'rating_above_4_5',
+                                             'proportion_rating_above_4_5':'proportion'})
+                            .reset_index())
+            
+            df1['proportion'] = (df1['proportion'] * 100).round(2)
+            df1=df1[(df1['rating_above_4_5']>0) & (df1['restaurants']>10)]
+            df1=df1[['city', 'country', 'proportion']]
+            
             st.dataframe(df1)
                 
         with col2:
-            st.markdown("<h4 style='text-align:left;margin-top: 0px;'>Most restaurants with ratings below 3.5</h4>",unsafe_allow_html=True)
-            df1=df[(df['aggregate_rating']<=3.5) & (df['votes']>3)]
-            df1=(df1[['city','country','restaurant_id']].groupby(['city','country'])
-                                                        .count()
-                                                        .sort_values('restaurant_id',ascending=False)
-                                                        .rename(columns={'restaurant_id':'restaurants'})
-                                                        .reset_index())
-                                                        # .head(10))
+            st.markdown("<h4 style='text-align:left;margin-top: 0px;'>Ratings below 4</h4>",unsafe_allow_html=True)
+            df1 = df[(df['aggregate_rating']<4.0) & (df['votes']>3)]
+            df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index() 
+            
+            df_merged = pd.merge(df2, df1[['city', 'country', 'restaurant_id']]
+                                .groupby(['city', 'country'])
+                                 .count()
+                                 .reset_index(), on=['city', 'country'], how='left', suffixes=('_total', '_rating_below_4'))
+            
+            df_merged['restaurant_id_rating_below_4'] = df_merged['restaurant_id_rating_below_4'].fillna(0).astype(int)  
+            
+            df_merged['proportion_rating_below_4'] = df_merged['restaurant_id_rating_below_4'] / df_merged['restaurant_id_total']
+            
+            df1 = (df_merged.sort_values('proportion_rating_below_4', ascending=False)
+                            .rename(columns={'restaurant_id_total':'restaurants',
+                                             'restaurant_id_rating_below_4':'rating_below_4',
+                                             'proportion_rating_below_4':'proportion'})
+                            .reset_index())
+            
+            df1['proportion'] = (df1['proportion'] * 100).round(2)
+            df1=df1[df1['rating_below_4']>0]
+            df1=df1[['city', 'country','proportion']]
+
             st.dataframe(df1)
             # st.markdown("""---""")
-
-
 
 
 
