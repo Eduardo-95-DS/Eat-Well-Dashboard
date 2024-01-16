@@ -123,7 +123,7 @@ def map_(df):
     else:
         bounds = None
         
-    st.markdown("<h1 style='text-align: right;'>World Map</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: Center;'>World Map</h1>", unsafe_allow_html=True)
 
     # Criar o mapa
     map_ = folium.Map(location=center_coordinates,zoom_start=4, control_scale=True)
@@ -173,7 +173,7 @@ def cuisines_map(df):
     else:
         bounds = None
         
-    st.markdown("<h1 style='text-align: right;'>Cuisines Map</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Cuisines Map</h1>", unsafe_allow_html=True)
         
     # Criar o mapa
     cuisine_map = folium.Map(location=center_coordinates,zoom_start=4, control_scale=True)
@@ -251,7 +251,7 @@ def price_map(df):
     else:
         bounds = None
         
-    st.markdown("<h1 style='text-align: right;'>Price Range Map</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Price Range Map</h1>", unsafe_allow_html=True)
 
     price_map = folium.Map(location=center_coordinates,zoom_start=4, control_scale=True)
     marker_cluster = MarkerCluster().add_to(price_map)
@@ -323,7 +323,7 @@ def agg_map (df):
     else:
         bounds = None
         
-    st.markdown("<h1 style='text-align: right;'>Aggregate Rating Map</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Aggregate Rating Map</h1>", unsafe_allow_html=True)
 
     agg_map = folium.Map(location=center_coordinates,zoom_start=4,control_scale=True)
     marker_cluster = MarkerCluster().add_to(agg_map)
@@ -534,7 +534,7 @@ st.set_page_config(layout='wide')
 # image=Image.open(image_path)
 # st.sidebar.image(image,width=120)
 
-st.header('Marktplace - Overview')
+st.markdown("<h1 style='text-align: center;'>Market Place - Overview</h1>",unsafe_allow_html=True)
 st.sidebar.markdown('# Eat Well Company')
 st.sidebar.markdown("""---""")
 
@@ -543,7 +543,6 @@ options= st.sidebar.selectbox('',('Cuisines', 'Price', 'Aggregate Rating', 'Avg 
 # st.sidebar.write('',option)
 st.sidebar.markdown("""---""")
 
-# countries = df['country'].unique()
 countries = ['World View','United States of America', 'Canada', 'Brazil', 'England','Australia', 'New Zealand', 'Philippines', 'Indonesia',
     'India', 'Sri Lanka', 'United Arab Emirates', 'Qatar','Turkey', 'Singapore']
 
@@ -551,67 +550,63 @@ st.sidebar.markdown('## Choose a country')
 selected_country = st.sidebar.selectbox('', countries)
 
 
-tab1,tab2=st.tabs(['Management Vision',' '])
+# tab1,tab2=st.tabs(['Management Vision',' '])
 
-with tab1:
-    with st.container():
+# with tab1:
+with st.container():
 
-        col1,col2,col3,col4,col5=st.columns(5)
-        with col1:
-            st.markdown('##### Unique restaurants')
-            unique_rest=len(df['restaurant_id'].unique())
-            col1.metric('',unique_rest)
-            # st.markdown("""---""")
-                
-        with col2:
-            st.markdown('##### Unique countries')
-            unique_countries=len(df['country'].unique())
-            col2.metric('',unique_countries)
-            # st.markdown("""---""")
-
-        with col3:
-            st.markdown("##### Unique cities")
-            unique_cities=len(df['city'].unique())
-            col3.metric('',unique_cities)
-            # st.markdown("""---""")
-
-        with col4:
-            st.markdown("##### Total votes")
-            votes=df["votes"].sum()
-            col4.metric('',votes)
-            # st.markdown("""---""")
+    col1,col2,col3,col4,col5=st.columns(5)
+    with col1:
+        st.markdown('##### Unique restaurants')
+        unique_rest=len(df['restaurant_id'].unique())
+        col1.metric('',unique_rest)
+        # st.markdown("""---""")
             
-        with col5:
-            st.markdown("##### Unique cuisines")
-            list=df['cuisines'].str.split(',',expand=True)
-            list= list.replace(',','', regex=True)
-            list= list.replace(' ','', regex=True)
-            
-            all=pd.DataFrame()
-            all['all']=pd.concat([list[0],list[1],list[2],list[3],list[4],list[5],list[6],list[7]])
-            all=all.dropna()
-            cuisines=len(all['all'].unique())
-            col5.metric('',cuisines)
-            # st.markdown("""---""")
-    
-    with st.container():
-        col1,col2=st.columns(2)
+    with col2:
+        st.markdown('##### Unique countries')
+        unique_countries=len(df['country'].unique())
+        col2.metric('',unique_countries)
+        # st.markdown("""---""")
+
+    with col3:
+        st.markdown("##### Unique cities")
+        unique_cities=len(df['city'].unique())
+        col3.metric('',unique_cities)
+        # st.markdown("""---""")
+
+    with col4:
+        st.markdown("##### Total votes")
+        votes=df["votes"].sum()
+        col4.metric('',votes)
+        # st.markdown("""---""")
         
-        with col1:
-            if options == 'Cuisines':
-                cuisines_map(df)
-            elif options =='Price':
-                price_map(df)
-            elif options =='Aggregate Rating':
-                agg_map(df)
-            elif options =='Avg Cost for Two':
-                avg_map(df)
-            else:
-                map_(df)
+    with col5:
+        st.markdown("##### Unique cuisines")
+        list=df['cuisines'].str.split(',',expand=True)
+        list= list.replace(',','', regex=True)
+        list= list.replace(' ','', regex=True)
+        
+        all=pd.DataFrame()
+        all['all']=pd.concat([list[0],list[1],list[2],list[3],list[4],list[5],list[6],list[7]])
+        all=all.dropna()
+        cuisines=len(all['all'].unique())
+        col5.metric('',cuisines)
+        # st.markdown("""---""")
 
-        with col2:
-
-            print('a')
+with st.container():
+    # col1,col2=st.columns(2)
+    
+    # with col1:
+    if options == 'Cuisines':
+        cuisines_map(df)
+    elif options =='Price':
+        price_map(df)
+    elif options =='Aggregate Rating':
+        agg_map(df)
+    elif options =='Avg Cost for Two':
+        avg_map(df)
+    else:
+        map_(df)
 
 
 

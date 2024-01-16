@@ -153,107 +153,107 @@ st.set_page_config(layout='wide')
 # image=Image.open(image_path)
 # st.sidebar.image(image,width=120)
 
-st.header('Country Vision')
+st.markdown("<h1 style='text-align: center;'>Country Vision</h1>",unsafe_allow_html=True)
 st.sidebar.markdown('# Eat Well Company')
 st.sidebar.markdown("""---""")
 
 
-tab1,tab2=st.tabs(['Management Vision',' '])
+# tab1,tab2=st.tabs(['Management Vision',' '])
 
-with tab1:
-    with st.container():
+# with tab1:
+with st.container():
 
-        col1,col2=st.columns(2)
-        with col1:
-            st.markdown("<h3 style='text-align: center;'>N° of restaurants</h3>",unsafe_allow_html=True)
-            df_aux = (df.loc[:, ['country', 'restaurant_id']].groupby('country')
-                                                          .count()
-                                                          .sort_values('restaurant_id',ascending=False)
-                                                          .reset_index())
-            
-            fig=px.bar(df_aux, x='restaurant_id', y='country', category_orders={'country': df_aux['country'].tolist()})
-            
-            fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
-            
-            st.plotly_chart(fig,use_container_width=True)
-            # st.markdown("""---""")
-                
-        with col2:
-            st.markdown("<h3 style='text-align: center;'>Unique cuisines</h3>",unsafe_allow_html=True)
-            df2=cuisines(df,'country')
-            df_aux = (df2.loc[:, ['country', 'cuisines']].groupby('country')
-                                                        .count()
-                                                        .sort_values('cuisines',ascending=False)
-                                                        .reset_index())
-            
-            fig=px.bar(df_aux, x='cuisines', y='country',category_orders={'country': df_aux['country'].tolist()})
-            
-            fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
-            
-            st.plotly_chart(fig,use_container_width=True)
-            # st.markdown("""---""")
-    
-    with st.container():
-
-        col1,col2=st.columns(2)
-        with col1:
-            st.markdown("<h3 style='text-align: center;'>Average rating</h3>",unsafe_allow_html=True)
-            df_aux = (df.loc[:, ['country', 'aggregate_rating']].groupby('country')
-                                                              .mean()
-                                                              .sort_values('aggregate_rating',ascending=False)
-                                                              .reset_index())
-            
-            fig=px.bar(df_aux, x='aggregate_rating', y='country',category_orders={'country': df_aux['country'].tolist()})
-            
-            fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
-            
-            st.plotly_chart(fig,use_container_width=True)
-            # st.markdown("""---""")
-                
-        with col2:
-            st.markdown("<h3 style='text-align: center;'>Average cost for two ($)</h3>",unsafe_allow_html=True)
-            df_aux = (df.loc[:, ['country', 'average_cost_for_two']].groupby('country')
-                                                                    .mean()
-                                                                    .sort_values('average_cost_for_two',ascending=False)
-                                                                    .reset_index()) 
-            
-            fig=px.bar(df_aux, x='average_cost_for_two', y='country',category_orders={'country': df_aux['country'].tolist()})
-            
-            fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
-            
-            st.plotly_chart(fig,use_container_width=True)
-            # st.markdown("""---""")
-
-    with st.container():
-        st.markdown("<h3 style='text-align: center;'>Price range (%)</h3>",unsafe_allow_html=True)
-        df_aux = (df.loc[:, ['country', 'price_range']].groupby('country')
-                                                      .value_counts()
-                                                      .sort_values(ascending=False)
+    col1,col2=st.columns(2)
+    with col1:
+        st.markdown("<h3 style='text-align: center;'>N° of restaurants</h3>",unsafe_allow_html=True)
+        df_aux = (df.loc[:, ['country', 'restaurant_id']].groupby('country')
+                                                      .count()
+                                                      .sort_values('restaurant_id',ascending=False)
                                                       .reset_index())
         
-        df_aux['percentage'] = df_aux.groupby('country')['count'].transform(lambda x: x / x.sum() * 100)
-        df_aux = df_aux.sort_values(by=['percentage'], ascending=True)
+        fig=px.bar(df_aux, x='restaurant_id', y='country', category_orders={'country': df_aux['country'].tolist()})
         
-        ordered_countries = df_aux[df_aux['price_range'] == 'gourmet']['country'].tolist()
-        category_order = ['gourmet', 'expensive', 'normal', 'cheap']
-        color_mapping = {'cheap': 'deepskyblue', 'normal': 'dodgerblue', 'expensive': 'mediumblue', 'gourmet': 'darkblue'}
-
-        fig=px.histogram(df_aux, x='count', y='country', hover_data='price_range', color="price_range",
-                                                     barnorm='percent',
-                                                     category_orders={'price_range': category_order},
-                                                     color_discrete_map=color_mapping)
-        
-        fig.update_xaxes(categoryorder='array', categoryarray=ordered_countries)
-        
-        fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), yaxis_tickfont=dict(size=15),
-                          legend=dict(font=dict(size=15)), legend_title_text='', height=500)
+        fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                          yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
         # st.markdown("""---""")
+            
+    with col2:
+        st.markdown("<h3 style='text-align: center;'>Unique cuisines</h3>",unsafe_allow_html=True)
+        df2=cuisines(df,'country')
+        df_aux = (df2.loc[:, ['country', 'cuisines']].groupby('country')
+                                                    .count()
+                                                    .sort_values('cuisines',ascending=False)
+                                                    .reset_index())
+        
+        fig=px.bar(df_aux, x='cuisines', y='country',category_orders={'country': df_aux['country'].tolist()})
+        
+        fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                          yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
+        
+        st.plotly_chart(fig,use_container_width=True)
+        # st.markdown("""---""")
+
+with st.container():
+
+    col1,col2=st.columns(2)
+    with col1:
+        st.markdown("<h3 style='text-align: center;'>Average rating</h3>",unsafe_allow_html=True)
+        df_aux = (df.loc[:, ['country', 'aggregate_rating']].groupby('country')
+                                                          .mean()
+                                                          .sort_values('aggregate_rating',ascending=False)
+                                                          .reset_index())
+        
+        fig=px.bar(df_aux, x='aggregate_rating', y='country',category_orders={'country': df_aux['country'].tolist()})
+        
+        fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                          yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
+        
+        st.plotly_chart(fig,use_container_width=True)
+        # st.markdown("""---""")
+            
+    with col2:
+        st.markdown("<h3 style='text-align: center;'>Average cost for two ($)</h3>",unsafe_allow_html=True)
+        df_aux = (df.loc[:, ['country', 'average_cost_for_two']].groupby('country')
+                                                                .mean()
+                                                                .sort_values('average_cost_for_two',ascending=False)
+                                                                .reset_index()) 
+        
+        fig=px.bar(df_aux, x='average_cost_for_two', y='country',category_orders={'country': df_aux['country'].tolist()})
+        
+        fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                          yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
+        
+        st.plotly_chart(fig,use_container_width=True)
+        # st.markdown("""---""")
+
+with st.container():
+    st.markdown("<h3 style='text-align: center;'>Price range (%)</h3>",unsafe_allow_html=True)
+    df_aux = (df.loc[:, ['country', 'price_range']].groupby('country')
+                                                  .value_counts()
+                                                  .sort_values(ascending=False)
+                                                  .reset_index())
+    
+    df_aux['percentage'] = df_aux.groupby('country')['count'].transform(lambda x: x / x.sum() * 100)
+    df_aux = df_aux.sort_values(by=['percentage'], ascending=True)
+    
+    ordered_countries = df_aux[df_aux['price_range'] == 'gourmet']['country'].tolist()
+    category_order = ['gourmet', 'expensive', 'normal', 'cheap']
+    color_mapping = {'cheap': 'deepskyblue', 'normal': 'dodgerblue', 'expensive': 'mediumblue', 'gourmet': 'darkblue'}
+
+    fig=px.histogram(df_aux, x='count', y='country', hover_data='price_range', color="price_range",
+                                                 barnorm='percent',
+                                                 category_orders={'price_range': category_order},
+                                                 color_discrete_map=color_mapping)
+    
+    fig.update_xaxes(categoryorder='array', categoryarray=ordered_countries)
+    
+    fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), yaxis_tickfont=dict(size=15),
+                      legend=dict(font=dict(size=15)), legend_title_text='', height=500)
+    
+    st.plotly_chart(fig,use_container_width=True)
+    # st.markdown("""---""")
                 
 
 
