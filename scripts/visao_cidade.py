@@ -165,7 +165,7 @@ with tab1:
 
         col1,col2=st.columns(2)
         with col1:
-            st.markdown("<h4 style='text-align: left;'>Variety of restaurants</h4>",unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>Variety of restaurants</h4>",unsafe_allow_html=True)
             df1=df.drop_duplicates(subset=['restaurant_name'])
             df1=(df1[['city','country','restaurant_name']].groupby(['city','country'])
                                                          .count()
@@ -173,8 +173,9 @@ with tab1:
                                                          .rename(columns={'restaurant_name':'restaurants'})
                                                          .reset_index()
                                                          .head(12))
-            
-            fig=px.histogram(df1, x='restaurants', y='city', hover_data='country', color="country",
+            df1['count']=df1['restaurants']
+
+            fig=px.histogram(df1, x='restaurants', y='city',text_auto=True, hover_data='country', color="country",
                                                              category_orders={'city': df1['city'].tolist()})
             
             fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
@@ -184,7 +185,7 @@ with tab1:
             st.plotly_chart(fig,use_container_width=True)
 
         with col2:
-            st.markdown("<h4 style='text-align: left;'>Variety of cuisines</h4>",unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>Variety of cuisines</h4>",unsafe_allow_html=True)
             list=df['cuisines'].str.split(',',expand=True)
             list= list.replace(',','', regex=True)
             list= list.replace(' ','', regex=True)
@@ -206,11 +207,12 @@ with tab1:
                                                 .reset_index()
                                                 .head(12))
 
-            fig=px.histogram(df1, x='cuisines', y='city', hover_data='country', color="country",
+            fig=px.histogram(df1, x='cuisines', y='city', text_auto=True, hover_data='country', color="country",
                                                              category_orders={'city': df1['city'].tolist()})
             
             fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
+                              yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                              legend_title_text='',height=500,margin=dict(t=0))
             
             st.plotly_chart(fig,use_container_width=True)
 
@@ -218,7 +220,7 @@ with tab1:
 
         col1,col2=st.columns(2)
         with col1:  
-            st.markdown("<h4 style='text-align:left;margin-top: 0px;'>Ratings above 4.5</h4>",unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Ratings above 4.5</h4>",unsafe_allow_html=True)
             
             df1=df[df['aggregate_rating']>4.5]
             df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index()  # total de restaurantes por cidade
@@ -243,18 +245,36 @@ with tab1:
             df1=df1[(df1['rating_above_4_5']>0) & (df1['restaurants']>10)]
             df1=df1[['city', 'country', 'proportion']]
             
-            st.dataframe(df1)
+            df1['below 4.5']=(df1['proportion']-100) *-1
+            df1=df1.rename(columns={'proportion':'above 4.5'}).sort_values('above 4.5',ascending=False).head(10)
+            df1.loc[8,'above 4.5']=45.10
+            df1.loc[8,'below 4.5']=54.90
+
+            fig = px.bar(df1, x=["above 4.5", "below 4.5"], y="city", color='country',text_auto=True,
+                         category_orders={'city': df1['city'].tolist()},
+                         labels={'above 4.5': 'Above 4.5%', 'below 4.5': 'Below 4.5%'})
+            
+            fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                              legend_title_text='',height=500,margin=dict(t=0))
+            
+            fig.update_traces(marker_line_color='black', marker_line_width=2, selector=dict(type='bar'))
+            
+            fig.update_xaxes(tickvals=[0, 50, 100], ticktext=['0%','50%','100%'])
+    
+            st.plotly_chart(fig,use_container_width=True)
                 
         with col2:
-            st.markdown("<h4 style='text-align:left;margin-top: 0px;'>Ratings below 4</h4>",unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Ratings below 4</h4>",unsafe_allow_html=True)
             df1 = df[(df['aggregate_rating']<4.0) & (df['votes']>3)]
-            df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index() 
+            df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index()  # total de restaurantes por cidade
             
             df_merged = pd.merge(df2, df1[['city', 'country', 'restaurant_id']]
                                 .groupby(['city', 'country'])
                                  .count()
                                  .reset_index(), on=['city', 'country'], how='left', suffixes=('_total', '_rating_below_4'))
             
+            # cidades sem restaurantes com nota abaixo de 4 
             df_merged['restaurant_id_rating_below_4'] = df_merged['restaurant_id_rating_below_4'].fillna(0).astype(int)  
             
             df_merged['proportion_rating_below_4'] = df_merged['restaurant_id_rating_below_4'] / df_merged['restaurant_id_total']
@@ -266,92 +286,62 @@ with tab1:
                             .reset_index())
             
             df1['proportion'] = (df1['proportion'] * 100).round(2)
-            df1=df1[df1['rating_below_4']>0]
+            df1=df1[df1['restaurants']>10]
             df1=df1[['city', 'country','proportion']]
-
-            st.dataframe(df1)
-            # st.markdown("""---""")
-
-with tab2:
-    with st.container():
-
-        col1,col2=st.columns(2)
-        with col1:
-            st.markdown("<h4 style='text-align: left;'>Variety of restaurants</h4>",unsafe_allow_html=True)
-            df1=df.drop_duplicates(subset=['restaurant_name'])
-            df1=(df1[['city','country','restaurant_name']].groupby(['city','country'])
-                                                         .count()
-                                                         .sort_values('restaurant_name',ascending=False)
-                                                         .rename(columns={'restaurant_name':'restaurants'})
-                                                         .reset_index())
-                                                         # .head(10))
-            st.dataframe(df1)
-                
-        with col2:
-            st.markdown("<h4 style='text-align: left;'>Variety of cuisines</h4>",unsafe_allow_html=True)
-            list=df['cuisines'].str.split(',',expand=True)
-            list= list.replace(',','', regex=True)
-            list= list.replace(' ','', regex=True)
-            list[['city','country']]=df[['city','country']]
-            list.fillna('empty', inplace=True)
-            list=list.drop_duplicates(ignore_index=True)
             
-            list['Combined'] = list[0].astype(str) +','+ list[1] +','+list[2]+','+list[3]+','+list[4]+','+list[5]+','+list[6]+','+list[7] 
+            df1['above 4.5']=(df1['proportion']-100) *-1
+            df1=df1.rename(columns={'proportion':'below 4.5'}).sort_values('below 4.5',ascending=False).head(10)
+
+            fig = (px.bar(df1, x=["below 4.5","above 4.5"], y="city",
+                                               color='country',text_auto=True,
+                                               category_orders={'city': df1['city'].tolist()}))
             
-            list= list.replace(',empty','', regex=True)
-            list=list[['Combined','city','country']]
-            list=list.assign(var1=list['Combined'].str.split(',')).explode('var1')
-            list=list.drop(columns=['Combined'])
-            list=list.drop_duplicates(ignore_index=True)
-            df1=(list[['city','country','var1']].groupby(['city','country'])
-                                                .count()
-                                                .sort_values('var1',ascending=False)
-                                                .rename(columns={'var1':'cuisines'})
-                                                .reset_index())
-            st.dataframe(df1)
-            # st.markdown("""---""")
+            fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                              legend_title_text='',height=500,margin=dict(t=0))
+            
+            fig.update_traces(marker_line_color='black', marker_line_width=2, selector=dict(type='bar'))
+            
+            fig.update_xaxes(tickvals=[0, 50, 100], ticktext=['0%','50%','100%'])
+
+            st.plotly_chart(fig,use_container_width=True)
 
     with st.container():
 
         col1,col2=st.columns(2)
         with col1:  
-            st.markdown("<h4 style='text-align:left;margin-top: 0px;'>Ratings above 4.5</h4>",unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Highest average cost for two ($)</h4>",unsafe_allow_html=True)
             
-            df1=df[df['aggregate_rating']>4.5]
-            df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index()  # total de restaurantes por cidade
+            df1=(df[['city','country','restaurant_name','average_cost_for_two']]
+                     .sort_values('average_cost_for_two',ascending=False)
+                     .head(10))
             
-            df_merged = pd.merge(df2, df1[['city', 'country', 'restaurant_id']]
-                                .groupby(['city', 'country'])
-                                 .count()
-                                 .reset_index(), on=['city', 'country'], how='left', suffixes=('_total', '_rating_above_4_5'))
+            custom_order = ['Singapore', 'New York City', 'Chicago', 'Pasay City', 'San Francisco']
+
             
-            # cidades sem restaurantes com nota abaixo de 4 
-            df_merged['restaurant_id_rating_above_4_5'] = df_merged['restaurant_id_rating_above_4_5'].fillna(0).astype(int)  
+            fig = px.scatter(df1,x='average_cost_for_two',y='city',color='country',height=400,category_orders={'city': custom_order},
+                             hover_data=['country', 'restaurant_name', 'average_cost_for_two'], size='average_cost_for_two')
             
-            df_merged['proportion_rating_above_4_5'] = df_merged['restaurant_id_rating_above_4_5'] / df_merged['restaurant_id_total']
+            # fig.update_traces(textposition='top center', hoverinfo='text+y')      
             
-            df1 = (df_merged.sort_values('restaurant_id_rating_above_4_5', ascending=False)
-                            .rename(columns={'restaurant_id_total':'restaurants',
-                                             'restaurant_id_rating_above_4_5':'rating_above_4_5',
-                                             'proportion_rating_above_4_5':'proportion'})
-                            .reset_index())
+
+            fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                              legend_title_text='',height=500,margin=dict(t=0))
             
-            df1['proportion'] = (df1['proportion'] * 100).round(2)
-            df1=df1[(df1['rating_above_4_5']>0) & (df1['restaurants']>10)]
-            df1=df1[['city', 'country', 'proportion']]
-            
-            st.dataframe(df1)
+            st.plotly_chart(fig,use_container_width=True)
                 
         with col2:
-            st.markdown("<h4 style='text-align:left;margin-top: 0px;'>Ratings below 4</h4>",unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Ratings below 4</h4>",unsafe_allow_html=True)
             df1 = df[(df['aggregate_rating']<4.0) & (df['votes']>3)]
-            df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index() 
+            df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index()  # total de restaurantes por cidade
             
             df_merged = pd.merge(df2, df1[['city', 'country', 'restaurant_id']]
                                 .groupby(['city', 'country'])
                                  .count()
                                  .reset_index(), on=['city', 'country'], how='left', suffixes=('_total', '_rating_below_4'))
             
+            # cidades sem restaurantes com nota abaixo de 4 
             df_merged['restaurant_id_rating_below_4'] = df_merged['restaurant_id_rating_below_4'].fillna(0).astype(int)  
             
             df_merged['proportion_rating_below_4'] = df_merged['restaurant_id_rating_below_4'] / df_merged['restaurant_id_total']
@@ -363,11 +353,27 @@ with tab2:
                             .reset_index())
             
             df1['proportion'] = (df1['proportion'] * 100).round(2)
-            df1=df1[df1['rating_below_4']>0]
+            df1=df1[df1['restaurants']>10]
             df1=df1[['city', 'country','proportion']]
+            
+            df1['above 4.5']=(df1['proportion']-100) *-1
+            df1=df1.rename(columns={'proportion':'below 4.5'}).sort_values('below 4.5',ascending=False).head(10)
 
-            st.dataframe(df1)
-            # st.markdown("""---""")
+            fig = (px.bar(df1, x=["below 4.5","above 4.5"], y="city",
+                                               color='country',
+                                               category_orders={'city': df1['city'].tolist()}))
+            
+            fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                              legend_title_text='',height=500,margin=dict(t=0))
+            
+            fig.update_traces(marker_line_color='black', marker_line_width=2, selector=dict(type='bar'))
+            
+            fig.update_xaxes(tickvals=[0, 50, 100], ticktext=['0%','50%','100%'])
+
+            st.plotly_chart(fig,use_container_width=True)
+           
+  
 
 
 
