@@ -141,7 +141,17 @@ df_raw.loc[6625,'longitude']=28.1878
 
 list=df_raw['cuisines'].str.split(',').apply(len)
 df_raw['cuisines_n°']=list
-df_raw[['cuisines','cuisines_n°']].head(5)
+
+df_raw['has_table_booking']=df_raw['has_table_booking'].apply(lambda x: 'Yes' if x==1 else 'No')
+df_raw['has_online_delivery']=df_raw['has_online_delivery'].apply(lambda x: 'Yes' if x==1 else 'No')
+df_raw['is_delivering_now']=df_raw['is_delivering_now'].apply(lambda x: 'Yes' if x==1 else 'No')
+
+df_raw=df_raw.assign(var1=df_raw['cuisines'].str.split(',')).explode('var1').rename(columns={'var1':'cuisine'})
+df_raw=df_raw.replace(' ','', regex=True).drop_duplicates(ignore_index=True)
+
+replace_dict = {'UnitedStatesofAmerica': 'United States of America', 'UnitedArabEmirates': 'United Arab Emirates',
+                'NewZeland':'New Zealand','SouthAfrica':'South Africa','Srilanka':'Sri Lanka'}
+df_raw['country'] = df_raw['country'].replace(replace_dict)
 
 df=df_raw.copy()
 
@@ -158,14 +168,93 @@ st.sidebar.markdown('# Eat Well Company')
 st.sidebar.markdown("""---""")
 
 
-# tab1,tab2=st.tabs(['Management Vision',' '])
+# filtro de preço
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Price range</span>
+    </div>
+""", unsafe_allow_html=True)
 
+price= st.sidebar.multiselect('',['cheap','normal','expensive','gourmet'],
+                               default=['cheap','normal','expensive','gourmet'],key='multiselect')
+
+rows=df['price_range'].isin(price)
+df=df.loc[rows,:]
+
+# filtro de booking
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Booking</span>
+    </div>
+""", unsafe_allow_html=True)
+
+booking= st.sidebar.multiselect('',['Yes','No'],
+                               default=['Yes','No'],key='booking')
+
+rows=df['has_table_booking'].isin(booking)
+df=df.loc[rows,:]
+
+# filtro de online delivery
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Online delivery</span>
+    </div>
+""", unsafe_allow_html=True)
+
+online= st.sidebar.multiselect('',['Yes','No'],
+                               default=['Yes','No'],key='online')
+
+rows=df['has_online_delivery'].isin(online)
+df=df.loc[rows,:]
+
+# filtro de delivering now
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Delivering now</span>
+    </div>
+""", unsafe_allow_html=True)
+
+delivery= st.sidebar.multiselect('',['Yes','No'],
+                               default=['Yes','No'],key='delivery')
+
+rows=df['is_delivering_now'].isin(online)
+df=df.loc[rows,:]
+
+# filtro de culinaria
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Cuisine</span>
+    </div>
+""", unsafe_allow_html=True)
+
+df['count'] = df.groupby('cuisine')['cuisine'].transform('count')
+df=df.sort_values('count',ascending=False)
+df['cuisine'] = df['cuisine'] + ' (' + df['count'].astype(str) + ')'
+df=df.drop(columns=['count'])
+cuisine=df['cuisine'].unique()
+cuisine=np.insert(cuisine, 0, 'All')
+cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
+
+if cuisines == 'All':
+    df=df.loc[(df['cuisine']==df['cuisine'])]
+else:
+    df=df.loc[(df['cuisine']==cuisines)]
+
+# filtro de reset
+reset_button = st.sidebar.button("Reset Visualizations")
+
+if reset_button:
+    df = df_raw.copy()
+else:
+    print('')
+
+# plots===================================================================================
 # with tab1:
 with st.container():
 
     col1,col2=st.columns(2)
     with col1:
-        st.markdown("<h3 style='text-align: center;'>N° of restaurants</h3>",unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Restaurants</h3>",unsafe_allow_html=True)
         df_aux = (df.loc[:, ['country', 'restaurant_id']].groupby('country')
                                                       .count()
                                                       .sort_values('restaurant_id',ascending=False)
@@ -180,14 +269,14 @@ with st.container():
         # st.markdown("""---""")
             
     with col2:
-        st.markdown("<h3 style='text-align: center;'>Unique cuisines</h3>",unsafe_allow_html=True)
-        df2=cuisines(df,'country')
-        df_aux = (df2.loc[:, ['country', 'cuisines']].groupby('country')
+        st.markdown("<h3 style='text-align: center;'>Cuisines</h3>",unsafe_allow_html=True)
+        # df2=cuisines(df,'country')
+        df_aux = (df.loc[:, ['country', 'cuisine']].groupby('country')
                                                     .count()
-                                                    .sort_values('cuisines',ascending=False)
+                                                    .sort_values('cuisine',ascending=False)
                                                     .reset_index())
         
-        fig=px.bar(df_aux, x='cuisines', y='country',category_orders={'country': df_aux['country'].tolist()})
+        fig=px.bar(df_aux, x='cuisine', y='country',category_orders={'country': df_aux['country'].tolist()})
         
         fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))

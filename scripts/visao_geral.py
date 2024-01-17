@@ -534,7 +534,7 @@ st.set_page_config(layout='wide')
 # image=Image.open(image_path)
 # st.sidebar.image(image,width=120)
 
-st.markdown("<h1 style='text-align: center;'>Market Place - Overview</h1>",unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>Overview</h1>",unsafe_allow_html=True)
 st.sidebar.markdown('# Eat Well Company')
 st.sidebar.markdown("""---""")
 
