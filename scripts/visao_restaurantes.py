@@ -153,7 +153,7 @@ df_raw=df_raw.replace(' ','', regex=True).drop_duplicates(ignore_index=True)
 # df_raw=df_raw.drop(columns=['count'])
 
 replace_dict = {'UnitedStatesofAmerica': 'United States of America', 'UnitedArabEmirates': 'United Arab Emirates',
-                'NewZeland':'New Zealand','SouthAfrica':'South Africa','Srilanka':'Sri Lanka'}
+                'NewZeland':'New Zealand','SouthAfrica':'South Africa','SriLanka':'Sri Lanka'}
 df_raw['country'] = df_raw['country'].replace(replace_dict)
 
 df=df_raw.copy()
@@ -210,26 +210,6 @@ if city == 'All':
     df=df.loc[(df['city']==df['city'])]
 else:
     df=df.loc[(df['city']==city)]
-
-# filtro de culinaria
-st.sidebar.markdown("""
-    <div style="margin-bottom: -70px;">
-        <span style="font-size:20px; font-weight:bold;">Cuisine</span>
-    </div>
-""", unsafe_allow_html=True)
-
-df['count'] = df.groupby('cuisine')['cuisine'].transform('count')
-df=df.sort_values('count',ascending=False)
-df['cuisine'] = df['cuisine'] + ' (' + df['count'].astype(str) + ')'
-df=df.drop(columns=['count'])
-cuisine=df['cuisine'].unique()
-cuisine=np.insert(cuisine, 0, 'All')
-cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
-
-if cuisines == 'All':
-    df=df.loc[(df['cuisine']==df['cuisine'])]
-else:
-    df=df.loc[(df['cuisine']==cuisines)]
     
 # filtro de preço
 st.sidebar.markdown("""
@@ -308,6 +288,26 @@ delivery= st.sidebar.multiselect('',['Yes','No'],
 
 rows=df['is_delivering_now'].isin(online)
 df=df.loc[rows,:]
+
+# filtro de culinaria
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Cuisine</span>
+    </div>
+""", unsafe_allow_html=True)
+
+df['count'] = df.groupby('cuisine')['cuisine'].transform('count')
+df=df.sort_values('count',ascending=False)
+df['cuisine'] = df['cuisine'] + ' (' + df['count'].astype(str) + ')'
+df=df.drop(columns=['count'])
+cuisine=df['cuisine'].unique()
+cuisine=np.insert(cuisine, 0, 'All')
+cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
+
+if cuisines == 'All':
+    df=df.loc[(df['cuisine']==df['cuisine'])]
+else:
+    df=df.loc[(df['cuisine']==cuisines)]
 
 # filtro de reset
 reset_button = st.sidebar.button("Reset Visualizations")

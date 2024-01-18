@@ -150,7 +150,7 @@ df_raw=df_raw.assign(var1=df_raw['cuisines'].str.split(',')).explode('var1').ren
 df_raw=df_raw.replace(' ','', regex=True).drop_duplicates(ignore_index=True)
 
 replace_dict = {'UnitedStatesofAmerica': 'United States of America', 'UnitedArabEmirates': 'United Arab Emirates',
-                'NewZeland':'New Zealand','SouthAfrica':'South Africa','Srilanka':'Sri Lanka'}
+                'NewZeland':'New Zealand','SouthAfrica':'South Africa','SriLanka':'Sri Lanka'}
 df_raw['country'] = df_raw['country'].replace(replace_dict)
 
 df=df_raw.copy()
@@ -254,8 +254,10 @@ with st.container():
 
     col1,col2=st.columns(2)
     with col1:
-        st.markdown("<h3 style='text-align: center;'>Restaurants</h3>",unsafe_allow_html=True)
-        df_aux = (df.loc[:, ['country', 'restaurant_id']].groupby('country')
+        st.markdown("<h3 style='text-align: center;'>N° of restaurants</h3>",unsafe_allow_html=True)
+
+        df_aux=df.drop_duplicates(subset=['restaurant_id'])
+        df_aux = (df_aux.loc[:, ['country', 'restaurant_id']].groupby('country')
                                                       .count()
                                                       .sort_values('restaurant_id',ascending=False)
                                                       .reset_index())
@@ -269,9 +271,10 @@ with st.container():
         # st.markdown("""---""")
             
     with col2:
-        st.markdown("<h3 style='text-align: center;'>Cuisines</h3>",unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Unique cuisines</h3>",unsafe_allow_html=True)
         # df2=cuisines(df,'country')
-        df_aux = (df.loc[:, ['country', 'cuisine']].groupby('country')
+        df_aux=df.drop_duplicates(subset=['restaurant_id'])
+        df_aux = (df_aux.loc[:, ['country', 'cuisine']].groupby('country')
                                                     .count()
                                                     .sort_values('cuisine',ascending=False)
                                                     .reset_index())
@@ -289,7 +292,8 @@ with st.container():
     col1,col2=st.columns(2)
     with col1:
         st.markdown("<h3 style='text-align: center;'>Average rating</h3>",unsafe_allow_html=True)
-        df_aux = (df.loc[:, ['country', 'aggregate_rating']].groupby('country')
+        df_aux=df.drop_duplicates(subset=['restaurant_id'])
+        df_aux = (df_aux.loc[:, ['country', 'aggregate_rating']].groupby('country')
                                                           .mean()
                                                           .sort_values('aggregate_rating',ascending=False)
                                                           .reset_index())
@@ -304,7 +308,8 @@ with st.container():
             
     with col2:
         st.markdown("<h3 style='text-align: center;'>Average cost for two ($)</h3>",unsafe_allow_html=True)
-        df_aux = (df.loc[:, ['country', 'average_cost_for_two']].groupby('country')
+        df_aux=df.drop_duplicates(subset=['restaurant_id'])
+        df_aux = (df_aux.loc[:, ['country', 'average_cost_for_two']].groupby('country')
                                                                 .mean()
                                                                 .sort_values('average_cost_for_two',ascending=False)
                                                                 .reset_index()) 
@@ -319,7 +324,8 @@ with st.container():
 
 with st.container():
     st.markdown("<h3 style='text-align: center;'>Price range (%)</h3>",unsafe_allow_html=True)
-    df_aux = (df.loc[:, ['country', 'price_range']].groupby('country')
+    df_aux=df.drop_duplicates(subset=['restaurant_id'])
+    df_aux = (df_aux.loc[:, ['country', 'price_range']].groupby('country')
                                                   .value_counts()
                                                   .sort_values(ascending=False)
                                                   .reset_index())
