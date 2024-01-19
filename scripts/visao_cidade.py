@@ -18,7 +18,7 @@ COUNTRIES = {
 148: "New Zeland",
 162: "Philippines",
 166: "Qatar",
-184: "Singapure",
+184: "Singapore",
 189: "South Africa",
 191: "Sri Lanka",
 208: "Turkey",
@@ -175,7 +175,7 @@ st.sidebar.markdown("""
 """, unsafe_allow_html=True)
 
 countries = ['All','United States of America', 'Canada', 'Brazil', 'England','Australia', 'New Zealand', 'Philippines', 'Indonesia',
-    'India', 'Sri Lanka', 'United Arab Emirates', 'Qatar','Turkey', 'Singapure','South Africa']
+    'India', 'Sri Lanka', 'United Arab Emirates', 'Qatar','Turkey', 'Singapore','South Africa']
 country = st.sidebar.selectbox('country', countries,label_visibility="hidden")
 
 if country == 'All':

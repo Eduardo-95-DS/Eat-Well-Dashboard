@@ -18,7 +18,7 @@ COUNTRIES = {
 148: "New Zeland",
 162: "Philippines",
 166: "Qatar",
-184: "Singapure",
+184: "Singapore",
 189: "South Africa",
 191: "Sri Lanka",
 208: "Turkey",

@@ -18,7 +18,7 @@ COUNTRIES = {
 148: "New Zeland",
 162: "Philippines",
 166: "Qatar",
-184: "Singapure",
+184: "Singapore",
 189: "South Africa",
 191: "Sri Lanka",
 208: "Turkey",
@@ -75,24 +75,6 @@ def dollarize (df):
     df['average_cost_for_two']=np.where(df['currency']=='Sri Lankan Rupee(LKR)', df['average_cost_for_two'] * 0.0031, df['average_cost_for_two'] )
     df['average_cost_for_two']=np.where(df['currency']=='Turkish Lira(TL)', df['average_cost_for_two'] * 0.034, df['average_cost_for_two'] )
     return df
-
-def cuisines (df,col):
-    df2=df['cuisines'].str.split(',',expand=True)
-    df2= df2.replace(',','', regex=True)
-    df2= df2.replace(' ','', regex=True)
-    df2[col]=df[col]
-    df2.fillna('empty', inplace=True)
-    df2=df2.drop_duplicates(ignore_index=True)
-    
-    df2['Combined'] = df2[0].astype(str) +','+ df2[1] +','+df2[2]+','+df2[3]+','+df2[4]+','+df2[5]+','+df2[6]+','+df2[7] 
-    
-    df2= df2.replace(',empty','', regex=True)
-    df2=df2[['Combined',col]]
-    df2=df2.assign(var1=df2['Combined'].str.split(',')).explode('var1').rename(columns={'var1':'cuisines'})
-    df2=df2.drop(columns=['Combined'])
-    df2=df2.drop_duplicates(ignore_index=True)
-
-    return df2
 
 #==================================================================================================
 
@@ -180,6 +162,8 @@ price= st.sidebar.multiselect('',['cheap','normal','expensive','gourmet'],
 
 rows=df['price_range'].isin(price)
 df=df.loc[rows,:]
+# rows2=df2['price_range'].isin(price)
+# df2=df2.loc[rows2,:]
 
 # filtro de booking
 st.sidebar.markdown("""
@@ -268,24 +252,27 @@ with st.container():
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
-        # st.markdown("""---""")
             
     with col2:
-        st.markdown("<h3 style='text-align: center;'>Unique cuisines</h3>",unsafe_allow_html=True)
-        # df2=cuisines(df,'country')
-        df_aux=df.drop_duplicates(subset=['restaurant_id'])
-        df_aux = (df_aux.loc[:, ['country', 'cuisine']].groupby('country')
+        st.markdown("<h3 style='text-align: center;'>Cuisines</h3>",unsafe_allow_html=True)
+        
+        df2=df[['cuisines','country']]
+        df2=df2.assign(var1=df2['cuisines'].str.split(',')).explode('var1').rename(columns={'var1':'all'})
+        df2= df2.replace(' ','', regex=True)
+        df2=df2.drop(columns=['cuisines'])
+        df2=df2[['country','all']]
+        df2=df2.drop_duplicates(ignore_index=True)
+        df2 = (df2.loc[:, ['country', 'all']].groupby('country')
                                                     .count()
-                                                    .sort_values('cuisine',ascending=False)
+                                                    .sort_values('all',ascending=False)
                                                     .reset_index())
         
-        fig=px.bar(df_aux, x='cuisine', y='country',category_orders={'country': df_aux['country'].tolist()})
+        fig=px.bar(df2, x='all', y='country',category_orders={'country': df2['country'].tolist()})
         
         fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
-        # st.markdown("""---""")
 
 with st.container():
 
@@ -304,7 +291,6 @@ with st.container():
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
-        # st.markdown("""---""")
             
     with col2:
         st.markdown("<h3 style='text-align: center;'>Average cost for two ($)</h3>",unsafe_allow_html=True)
@@ -320,7 +306,6 @@ with st.container():
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
-        # st.markdown("""---""")
 
 with st.container():
     st.markdown("<h3 style='text-align: center;'>Price range (%)</h3>",unsafe_allow_html=True)
@@ -348,7 +333,6 @@ with st.container():
                       legend=dict(font=dict(size=15)), legend_title_text='', height=500)
     
     st.plotly_chart(fig,use_container_width=True)
-    # st.markdown("""---""")
                 
 
 
