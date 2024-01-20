@@ -146,7 +146,7 @@ df_raw['has_table_booking']=df_raw['has_table_booking'].apply(lambda x: 'Yes' if
 df_raw['has_online_delivery']=df_raw['has_online_delivery'].apply(lambda x: 'Yes' if x==1 else 'No')
 df_raw['is_delivering_now']=df_raw['is_delivering_now'].apply(lambda x: 'Yes' if x==1 else 'No')
 
-df_raw=df_raw.assign(var1=df_raw['cuisines'].str.split(',')).explode('var1').rename(columns={'var1':'cuisine'})
+df_raw=df_raw.assign(cuisine=df_raw['cuisines'].str.split(',')).explode('cuisine')
 df_raw=df_raw.replace(' ','', regex=True).drop_duplicates(ignore_index=True)
 # df_raw['count'] = df_raw.groupby('cuisine')['cuisine'].transform('count')
 # df_raw['cuisine'] = df_raw['cuisine'] + ' (' + df_raw['count'].astype(str) + ')'
@@ -327,7 +327,7 @@ with st.container():
     col1,col2=st.columns(2)
     with col1:
         
-        st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Top rated</h4>",unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align: center;'>Best average rating</h4>",unsafe_allow_html=True)
     
         # df1=df[df['votes']>3]
         df1=df.drop_duplicates(subset=['restaurant_id'])
@@ -340,7 +340,7 @@ with st.container():
 
     with col2:
         
-        st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Worst rated</h4>",unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Worst average rating</h4>",unsafe_allow_html=True)
     
         df1=df[df['votes']>3]
         df1=df1.drop_duplicates(subset=['restaurant_id'])        
@@ -353,7 +353,7 @@ with st.container():
 
 with st.container():
     
-    st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Avg cost for two</h4>",unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Average cost for two</h4>",unsafe_allow_html=True)
 
     # df1=df.copy()
     df1=df.drop_duplicates(subset=['restaurant_id'])
@@ -367,9 +367,9 @@ with st.container():
     fig = px.bar(df1, x='average_cost_for_two', y="restaurant_name", color='country',text='city',text_auto=True,
                  category_orders={'restaurant_name': df1['restaurant_name'].tolist()})
     
-    fig.update_layout(xaxis=dict(title=''), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                      yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
-                      legend_title_text='',height=500,margin=dict(t=0))
+    fig.update_layout(xaxis=dict(title='Price in dollars ($)',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                          yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                          legend_title_text='',height=500,margin=dict(t=0))
     
     fig.update_traces(marker_line_color='black', marker_line_width=2, selector=dict(type='bar'))
     

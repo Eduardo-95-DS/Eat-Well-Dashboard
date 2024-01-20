@@ -168,8 +168,8 @@ with st.container():
     with col1:
         st.markdown("<h3 style='text-align: center;'>Most expensive</h3>",unsafe_allow_html=True)
         
-        df2=df.copy()
-        df2=df2.assign(cuisine=df2['cuisines'].str.split(',')).explode('cuisine')
+        # df2=df.copy()
+        df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
         df2=df2.drop_duplicates(ignore_index=True)
         
         df_aux=(df2[['cuisine','average_cost_for_two']].groupby('cuisine')
@@ -207,7 +207,7 @@ with st.container():
 
     col1,col2=st.columns(2)
     with col1:
-        st.markdown("<h3 style='text-align: center;'>Better rated</h3>",unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Best average rating</h3>",unsafe_allow_html=True)
         
         df_aux=(df2[['cuisine','aggregate_rating']].groupby('cuisine')
                                                        .mean()
@@ -217,13 +217,13 @@ with st.container():
         
         fig=px.bar(df_aux, x='aggregate_rating', y='cuisine', category_orders={'cuisine': df_aux['cuisine'].tolist()})
         
-        fig.update_layout(xaxis=dict(title='Aggregate rating',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+        fig.update_layout(xaxis=dict(title='0-5',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
             
     with col2:
-        st.markdown("<h3 style='text-align: center;'>Worst rated</h3>",unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Worst average rating</h3>",unsafe_allow_html=True)
         
         df_aux=df2[df2['votes']>3]
         df_aux=(df_aux[['cuisine','aggregate_rating']].groupby('cuisine')
@@ -234,7 +234,7 @@ with st.container():
         
         fig=px.bar(df_aux, x='aggregate_rating', y='cuisine', category_orders={'cuisine': df_aux['cuisine'].tolist()})
         
-        fig.update_layout(xaxis=dict(title='Aggregate rating',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+        fig.update_layout(xaxis=dict(title='0-5',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
