@@ -146,12 +146,12 @@ df_raw['has_table_booking']=df_raw['has_table_booking'].apply(lambda x: 'Yes' if
 df_raw['has_online_delivery']=df_raw['has_online_delivery'].apply(lambda x: 'Yes' if x==1 else 'No')
 df_raw['is_delivering_now']=df_raw['is_delivering_now'].apply(lambda x: 'Yes' if x==1 else 'No')
 
-df_raw=df_raw.assign(cuisine=df_raw['cuisines'].str.split(',')).explode('cuisine').rename(columns={'var1':'cuisine'})
-df_raw=df_raw.replace(' ','', regex=True).drop_duplicates(ignore_index=True)
+# df_raw=df_raw.assign(cuisine=df_raw['cuisines'].str.split(',')).explode('cuisine').rename(columns={'var1':'cuisine'})
+# df_raw=df_raw.replace(' ','', regex=True).drop_duplicates(ignore_index=True)
 
-replace_dict = {'UnitedStatesofAmerica': 'United States of America', 'UnitedArabEmirates': 'United Arab Emirates',
-                'NewZeland':'New Zealand','SouthAfrica':'South Africa','SriLanka':'Sri Lanka'}
-df_raw['country'] = df_raw['country'].replace(replace_dict)
+# replace_dict = {'UnitedStatesofAmerica': 'United States of America', 'UnitedArabEmirates': 'United Arab Emirates',
+#                 'NewZeland':'New Zealand','SouthAfrica':'South Africa','SriLanka':'Sri Lanka'}
+# df_raw['country'] = df_raw['country'].replace(replace_dict)
 
 df=df_raw.copy()
 
@@ -258,18 +258,35 @@ st.sidebar.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-df['count'] = df.groupby('cuisine')['cuisine'].transform('count')
-df=df.sort_values('count',ascending=False)
-df['cuisine'] = df['cuisine'] + ' (' + df['count'].astype(str) + ')'
-df=df.drop(columns=['count'])
-cuisine=df['cuisine'].unique()
+# df['count'] = df.groupby('cuisine')['cuisine'].transform('count')
+# df=df.sort_values('count',ascending=False)
+# df['cuisine'] = df['cuisine'] + ' (' + df['count'].astype(str) + ')'
+# df=df.drop(columns=['count'])
+# cuisine=df['cuisine'].unique()
+# cuisine=np.insert(cuisine, 0, 'All')
+# cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
+
+# if cuisines == 'All':
+#     df=df.loc[(df['cuisine']==df['cuisine'])]
+# else:
+#     df=df.loc[(df['cuisine']==cuisines)]
+
+df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
+df2['cuisine']=df2['cuisine'].replace(' ','', regex=True)
+df2['count'] = df2.groupby('cuisine')['cuisine'].transform('count')
+df2=df2.sort_values('count',ascending=False)
+cuisine=df2['cuisine'].unique()
 cuisine=np.insert(cuisine, 0, 'All')
+
 cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
+cuisines = [cuisines]
 
 if cuisines == 'All':
-    df=df.loc[(df['cuisine']==df['cuisine'])]
+    df=df.loc[(df['cuisines']==df['cuisines'])]
 else:
-    df=df.loc[(df['cuisine']==cuisines)]
+    mascara = df['cuisines'].str.contains('|'.join(cuisines), case=False)
+    linhas_desejadas = df[mascara]
+    df=linhas_desejadas
 
 # filtro de reset
 reset_button = st.sidebar.button("Reset Visualizations")

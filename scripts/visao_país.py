@@ -128,12 +128,7 @@ df_raw['has_table_booking']=df_raw['has_table_booking'].apply(lambda x: 'Yes' if
 df_raw['has_online_delivery']=df_raw['has_online_delivery'].apply(lambda x: 'Yes' if x==1 else 'No')
 df_raw['is_delivering_now']=df_raw['is_delivering_now'].apply(lambda x: 'Yes' if x==1 else 'No')
 
-df_raw=df_raw.assign(cuisine=df_raw['cuisines'].str.split(',')).explode('cuisine')
-df_raw=df_raw.replace(' ','', regex=True).drop_duplicates(ignore_index=True)
-
-replace_dict = {'UnitedStatesofAmerica': 'United States of America', 'UnitedArabEmirates': 'United Arab Emirates',
-                'NewZeland':'New Zealand','SouthAfrica':'South Africa','SriLanka':'Sri Lanka'}
-df_raw['country'] = df_raw['country'].replace(replace_dict)
+df_raw['cuisines']=df_raw['cuisines'].replace(' ','', regex=True)
 
 df=df_raw.copy()
 
@@ -175,9 +170,14 @@ st.sidebar.markdown("""
 booking= st.sidebar.multiselect('',['Yes','No'],
                                default=['Yes','No'],key='booking')
 
-rows=df['has_table_booking'].isin(booking)
-df=df.loc[rows,:]
+# rows=df['has_table_booking'].isin(booking)
+# df=df.loc[rows,:]
 
+if not booking:
+    rows = ~df['has_table_booking'].isna()
+else:
+    rows = df['has_table_booking'].isin(booking)
+    
 # filtro de online delivery
 st.sidebar.markdown("""
     <div style="margin-bottom: -70px;">
@@ -188,9 +188,15 @@ st.sidebar.markdown("""
 online= st.sidebar.multiselect('',['Yes','No'],
                                default=['Yes','No'],key='online')
 
-rows=df['has_online_delivery'].isin(online)
-df=df.loc[rows,:]
+# rows=df['has_online_delivery'].isin(online)
+# df=df.loc[rows,:]
 
+if not online:
+    rows = ~df['has_online_delivery'].isna()
+else:
+    rows = df['has_online_delivery'].isin(online)
+
+df = df.loc[rows, :]
 # filtro de delivering now
 st.sidebar.markdown("""
     <div style="margin-bottom: -70px;">
@@ -201,8 +207,13 @@ st.sidebar.markdown("""
 delivery= st.sidebar.multiselect('',['Yes','No'],
                                default=['Yes','No'],key='delivery')
 
-rows=df['is_delivering_now'].isin(online)
-df=df.loc[rows,:]
+# rows=df['is_delivering_now'].isin(delivery)
+# df=df.loc[rows,:]
+
+if not delivery:
+    rows = ~df['is_delivering_now'].isna()
+else:
+    rows = df['is_delivering_now'].isin(delivery)
 
 # filtro de culinaria
 st.sidebar.markdown("""
@@ -211,19 +222,22 @@ st.sidebar.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-df['count'] = df.groupby('cuisine')['cuisine'].transform('count')
-df=df.sort_values('count',ascending=False)
-df['cuisine'] = df['cuisine'] + ' (' + df['count'].astype(str) + ')'
-df=df.drop(columns=['count'])
-cuisine=df['cuisine'].unique()
+df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
+df2['cuisine']=df2['cuisine'].replace(' ','', regex=True)
+df2['count'] = df2.groupby('cuisine')['cuisine'].transform('count')
+df2=df2.sort_values('count',ascending=False)
+cuisine=df2['cuisine'].unique()
 cuisine=np.insert(cuisine, 0, 'All')
 cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
+cuisines = [cuisines]
 
-if cuisines == 'All':
-    df=df.loc[(df['cuisine']==df['cuisine'])]
+if 'All' in cuisines:
+    df = df
 else:
-    df=df.loc[(df['cuisine']==cuisines)]
-
+    mascara = df['cuisines'].str.contains('|'.join(cuisines), case=False)
+    linhas_desejadas = df[mascara]
+    df=linhas_desejadas
+    
 # filtro de reset
 reset_button = st.sidebar.button("Reset Visualizations")
 
