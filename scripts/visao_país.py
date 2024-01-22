@@ -328,8 +328,8 @@ with st.container():
         
         st.markdown("<h3 style='text-align: center;'>Price range</h3>",unsafe_allow_html=True)
         
-        df_aux=df.drop_duplicates(subset=['restaurant_id'])
-        df_aux = (df_aux.loc[:, ['country', 'price_range']].groupby('country')
+        # df_aux=df.drop_duplicates(subset=['restaurant_id'])
+        df_aux = (df.loc[:, ['country', 'price_range']].groupby('country')
                                                       .value_counts()
                                                       .sort_values(ascending=False)
                                                       .reset_index())
