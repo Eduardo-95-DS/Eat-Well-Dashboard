@@ -146,6 +146,8 @@ df_raw['has_table_booking']=df_raw['has_table_booking'].apply(lambda x: 'Yes' if
 df_raw['has_online_delivery']=df_raw['has_online_delivery'].apply(lambda x: 'Yes' if x==1 else 'No')
 df_raw['is_delivering_now']=df_raw['is_delivering_now'].apply(lambda x: 'Yes' if x==1 else 'No')
 
+df_raw['cuisines']=df_raw['cuisines'].replace(' ','', regex=True)
+
 df=df_raw.copy()
 
 # Barra lateral=====================================================================
@@ -160,16 +162,158 @@ st.markdown("<h1 style='text-align: center;'>Cuisine Vision</h1>",unsafe_allow_h
 st.sidebar.markdown('# Eat Well Company')
 st.sidebar.markdown("""---""")
 
+# filtro de país
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Country</span>
+    </div>
+""", unsafe_allow_html=True)
+
+countries = ['All','United States of America', 'Canada', 'Brazil', 'England','Australia', 'New Zealand', 'Philippines', 'Indonesia',
+    'India', 'Sri Lanka', 'United Arab Emirates', 'Qatar','Turkey', 'Singapure','South Africa']
+country = st.sidebar.selectbox('country', countries,label_visibility="hidden")
+
+if country == 'All':
+    df=df.loc[(df['country']==df['country'])]
+else:
+    df=df.loc[(df['country']==country)]
+
+# filtro de cidade
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">City</span>
+    </div>
+""", unsafe_allow_html=True)
+
+cities=df['city'].unique()
+cities=np.insert(cities, 0, 'All')
+city = st.sidebar.selectbox('city', cities ,label_visibility="hidden")
+
+if city == 'All':
+    df=df.loc[(df['city']==df['city'])]
+else:
+    df=df.loc[(df['city']==city)]
+    
+# filtro de preço
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Price range</span>
+    </div>
+""", unsafe_allow_html=True)
+
+price= st.sidebar.multiselect('',['cheap','normal','expensive','gourmet'],
+                               default=['cheap','normal','expensive','gourmet'],key='multiselect')
+
+rows=df['price_range'].isin(price)
+df=df.loc[rows,:]
+
+# filtro de booking
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Booking</span>
+    </div>
+""", unsafe_allow_html=True)
+
+# booking=df['has_table_booking'].unique()
+# booking=np.insert(booking, 0, 'All')
+# book = st.sidebar.selectbox('table', booking, label_visibility="hidden")
+
+# if book == 'All':
+#     df=df.loc[(df['has_table_booking']==df['has_table_booking'])]
+# else:
+#     df=df.loc[(df['has_table_booking']==book)]
+booking= st.sidebar.multiselect('',['Yes','No'],
+                               default=['Yes','No'],key='booking')
+
+rows=df['has_table_booking'].isin(booking)
+df=df.loc[rows,:]
+
+# filtro de online delivery
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Online delivery</span>
+    </div>
+""", unsafe_allow_html=True)
+
+# online_delivery=df['has_online_delivery'].unique()
+# online_delivery=np.insert(online_delivery, 0, 'All')
+# delivery = st.sidebar.selectbox('', online_delivery)
+
+# if delivery == 'All':
+#     df=df.loc[(df['has_online_delivery']==df['has_online_delivery'])]
+# else:
+#     df=df.loc[(df['has_online_delivery']==delivery)]
+
+online= st.sidebar.multiselect('',['Yes','No'],
+                               default=['Yes','No'],key='online')
+
+rows=df['has_online_delivery'].isin(online)
+df=df.loc[rows,:]
+
+# filtro de delivering now
+st.sidebar.markdown("""
+    <div style="margin-bottom: -70px;">
+        <span style="font-size:20px; font-weight:bold;">Delivering now</span>
+    </div>
+""", unsafe_allow_html=True)
+
+# delivering=df['is_delivering_now'].unique()
+# delivering=np.insert(delivering, 0, 'All')
+# now = st.sidebar.selectbox('delivering', delivering, label_visibility="hidden")
+
+# if now == 'All':
+#     df=df.loc[(df['is_delivering_now']==df['is_delivering_now'])]
+# else:
+#     df=df.loc[(df['is_delivering_now']==now)]
+
+delivery= st.sidebar.multiselect('',['Yes','No'],
+                               default=['Yes','No'],key='delivery')
+
+rows=df['is_delivering_now'].isin(delivery)
+df=df.loc[rows,:]
+
+# # filtro de culinaria
+# st.sidebar.markdown("""
+#     <div style="margin-bottom: -70px;">
+#         <span style="font-size:20px; font-weight:bold;">Cuisine</span>
+#     </div>
+# """, unsafe_allow_html=True)
+
+# df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
+# df2['cuisine']=df2['cuisine'].replace(' ','', regex=True)
+# df2['count'] = df2.groupby('cuisine')['cuisine'].transform('count')
+# df2=df2.sort_values('count',ascending=False)
+# cuisine=df2['cuisine'].unique()
+# cuisine=np.insert(cuisine, 0, 'All')
+# cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
+# cuisines = [cuisines]
+
+# if 'All' in cuisines:
+#     df = df
+# else:
+#     mascara = df['cuisines'].str.contains('|'.join(cuisines), case=True)
+#     linhas_desejadas = df[mascara]
+#     df=linhas_desejadas
+
+# filtro de reset
+reset_button = st.sidebar.button("Reset Visualizations")
+
+if reset_button:
+    df = df_raw.copy()
+else:
+    print('')
+
 
 # plots===================================================================================
 with st.container():
 
     col1,col2=st.columns(2)
     with col1:
-        st.markdown("<h3 style='text-align: center;'>Most expensive</h3>",unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Highest average cost for two</h3>",unsafe_allow_html=True)
         
         # df2=df.copy()
         df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
+        df2['cuisine']=df2['cuisine'].replace(' ','', regex=True)
         df2=df2.drop_duplicates(ignore_index=True)
         
         df_aux=(df2[['cuisine','average_cost_for_two']].groupby('cuisine')
@@ -180,13 +324,13 @@ with st.container():
         
         fig=px.bar(df_aux, x='average_cost_for_two', y='cuisine', category_orders={'cuisine': df_aux['cuisine'].tolist()})
         
-        fig.update_layout(xaxis=dict(title='Average price for two ($)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+        fig.update_layout(xaxis=dict(title='Price in dollars ($)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
             
     with col2:
-        st.markdown("<h3 style='text-align: center;'>Most cheap</h3>",unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Lowest average price for two</h3>",unsafe_allow_html=True)
         
         df_aux=df2[df2['average_cost_for_two']>0]
         df_aux=(df_aux[['cuisine','average_cost_for_two']].groupby('cuisine')
@@ -197,7 +341,7 @@ with st.container():
         
         fig=px.bar(df_aux, x='average_cost_for_two', y='cuisine', category_orders={'cuisine': df_aux['cuisine'].tolist()})
         
-        fig.update_layout(xaxis=dict(title='Average price for two ($)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+        fig.update_layout(xaxis=dict(title='Price in dollars ($)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
@@ -223,7 +367,7 @@ with st.container():
         st.plotly_chart(fig,use_container_width=True)
             
     with col2:
-        st.markdown("<h3 style='text-align: center;'>Worst average rating</h3>",unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Worse average rating</h3>",unsafe_allow_html=True)
         
         df_aux=df2[df2['votes']>3]
         df_aux=(df_aux[['cuisine','aggregate_rating']].groupby('cuisine')

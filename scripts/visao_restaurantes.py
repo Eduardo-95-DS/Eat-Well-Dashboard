@@ -146,15 +146,17 @@ df_raw['has_table_booking']=df_raw['has_table_booking'].apply(lambda x: 'Yes' if
 df_raw['has_online_delivery']=df_raw['has_online_delivery'].apply(lambda x: 'Yes' if x==1 else 'No')
 df_raw['is_delivering_now']=df_raw['is_delivering_now'].apply(lambda x: 'Yes' if x==1 else 'No')
 
-df_raw=df_raw.assign(cuisine=df_raw['cuisines'].str.split(',')).explode('cuisine')
-df_raw=df_raw.replace(' ','', regex=True).drop_duplicates(ignore_index=True)
+df_raw['cuisines']=df_raw['cuisines'].replace(' ','', regex=True)
+
+# df_raw=df_raw.assign(cuisine=df_raw['cuisines'].str.split(',')).explode('cuisine')
+# df_raw=df_raw.replace(' ','', regex=True).drop_duplicates(ignore_index=True)
 # df_raw['count'] = df_raw.groupby('cuisine')['cuisine'].transform('count')
 # df_raw['cuisine'] = df_raw['cuisine'] + ' (' + df_raw['count'].astype(str) + ')'
 # df_raw=df_raw.drop(columns=['count'])
 
-replace_dict = {'UnitedStatesofAmerica': 'United States of America', 'UnitedArabEmirates': 'United Arab Emirates',
-                'NewZeland':'New Zealand','SouthAfrica':'South Africa','SriLanka':'Sri Lanka'}
-df_raw['country'] = df_raw['country'].replace(replace_dict)
+# replace_dict = {'UnitedStatesofAmerica': 'United States of America', 'UnitedArabEmirates': 'United Arab Emirates',
+#                 'NewZeland':'New Zealand','SouthAfrica':'South Africa','SriLanka':'Sri Lanka'}
+# df_raw['country'] = df_raw['country'].replace(replace_dict)
 
 df=df_raw.copy()
 
@@ -286,7 +288,7 @@ st.sidebar.markdown("""
 delivery= st.sidebar.multiselect('',['Yes','No'],
                                default=['Yes','No'],key='delivery')
 
-rows=df['is_delivering_now'].isin(online)
+rows=df['is_delivering_now'].isin(delivery)
 df=df.loc[rows,:]
 
 # filtro de culinaria
@@ -296,30 +298,29 @@ st.sidebar.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-df['count'] = df.groupby('cuisine')['cuisine'].transform('count')
-df=df.sort_values('count',ascending=False)
-df['cuisine'] = df['cuisine'] + ' (' + df['count'].astype(str) + ')'
-df=df.drop(columns=['count'])
-cuisine=df['cuisine'].unique()
+df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
+df2['cuisine']=df2['cuisine'].replace(' ','', regex=True)
+df2['count'] = df2.groupby('cuisine')['cuisine'].transform('count')
+df2=df2.sort_values('count',ascending=False)
+cuisine=df2['cuisine'].unique()
 cuisine=np.insert(cuisine, 0, 'All')
 cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
+cuisines = [cuisines]
 
-if cuisines == 'All':
-    df=df.loc[(df['cuisine']==df['cuisine'])]
+if 'All' in cuisines:
+    df = df
 else:
-    df=df.loc[(df['cuisine']==cuisines)]
+    mascara = df['cuisines'].str.contains('|'.join(cuisines), case=True)
+    linhas_desejadas = df[mascara]
+    df=linhas_desejadas
 
 # filtro de reset
 reset_button = st.sidebar.button("Reset Visualizations")
 
 if reset_button:
     df = df_raw.copy()
-    country = 'All'
 else:
-    if country == 'All':
-        df=df.loc[(df['country']==df['country'])]
-    else:
-        df=df.loc[(df['country']==country)]
+    print('')
 
 # plots======================================================================
 with st.container():
@@ -352,29 +353,52 @@ with st.container():
         st.dataframe(df1)
 
 with st.container():
+
+    # col1,col2=st.columns(2)
+    # with col1:
+    st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Highest average cost for two</h4>",unsafe_allow_html=True)
     
-    st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Average cost for two</h4>",unsafe_allow_html=True)
-
-    # df1=df.copy()
     df1=df.drop_duplicates(subset=['restaurant_id'])
-
+    
     df1=(df1[['restaurant_name','country','city','average_cost_for_two']].groupby(['restaurant_name','country','city'])
                                                   .mean()
                                                   .sort_values('average_cost_for_two',ascending=False)
                                                   .reset_index()
                                                   .head(10))
-
+    
     fig = px.bar(df1, x='average_cost_for_two', y="restaurant_name", color='country',text='city',text_auto=True,
                  category_orders={'restaurant_name': df1['restaurant_name'].tolist()})
     
     fig.update_layout(xaxis=dict(title='Price in dollars ($)',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                          yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
-                          legend_title_text='',height=500,margin=dict(t=0))
+                          yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15),x=10), 
+                          legend_title_text='',height=400,width=500,margin=dict(t=0))
     
     fig.update_traces(marker_line_color='black', marker_line_width=2, selector=dict(type='bar'))
     
     st.plotly_chart(fig,use_container_width=True)    
 
+with st.container():
+
+    st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Lowest average cost for two</h4>",unsafe_allow_html=True)
+    
+    df1=df.drop_duplicates(subset=['restaurant_id'])
+    
+    df1=(df1[['restaurant_name','country','city','average_cost_for_two']].groupby(['restaurant_name','country','city'])
+                                                  .mean()
+                                                      .sort_values('average_cost_for_two',ascending=True)
+                                                  .reset_index()
+                                                  .head(10))
+    
+    fig = px.bar(df1, x='average_cost_for_two', y="restaurant_name", color='country',text='city',text_auto=True,
+                 category_orders={'restaurant_name': df1['restaurant_name'].tolist()})
+    
+    fig.update_layout(xaxis=dict(title='Price in dollars ($)',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                          yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15),x=10), 
+                          legend_title_text='',height=400,width=500,margin=dict(t=0))
+    
+    fig.update_traces(marker_line_color='black', marker_line_width=2, selector=dict(type='bar'))
+    
+    st.plotly_chart(fig,use_container_width=True)    
 
 
 

@@ -262,10 +262,23 @@ else:
     df=linhas_desejadas
     
 # filtro de reset
+# # Defina a função para criar um objeto de estado da sessão
+# class SessionState:
+#     def __init__(self, **kwargs):
+#         self.__dict__.update(kwargs)
+
+# # Inicialize o objeto de estado da sessão
+# session_state = SessionState(price_reset=False, booking_reset=False, online_reset=False, delivery_reset=False, cuisine_reset=False)
+
 reset_button = st.sidebar.button("Reset Visualizations")
 
 if reset_button:
     df = df_raw.copy()
+    # session_state.price_reset = False
+    # session_state.booking_reset = False
+    # session_state.online_reset = False
+    # session_state.delivery_reset = False
+    # session_state.cuisine_reset = False
 else:
     print('')
 
@@ -301,7 +314,7 @@ if 'All' in cuisines:
     
             df2=df[['cuisines','country']]
             df2=df2.assign(all=df2['cuisines'].str.split(',')).explode('all')
-            df2= df2.replace(' ','', regex=True)
+            df2['all']= df2['all'].replace(' ','', regex=True)
             df2=df2.drop(columns=['cuisines'])
             df2=df2[['country','all']]
             df2=df2.drop_duplicates(ignore_index=True)
@@ -346,7 +359,7 @@ elif reset_button:
     
             df2=df[['cuisines','country']]
             df2=df2.assign(all=df2['cuisines'].str.split(',')).explode('all')
-            df2= df2.replace(' ','', regex=True)
+            df2['all']=df2['all'].replace(' ','', regex=True)
             df2=df2.drop(columns=['cuisines'])
             df2=df2[['country','all']]
             df2=df2.drop_duplicates(ignore_index=True)
@@ -364,9 +377,10 @@ elif reset_button:
 else:
 
     with st.container():
-    
+        # col1,col2=st.columns(2)
+        # with col1:
         st.markdown("<h3 style='text-align: center;'>N° of restaurants</h3>",unsafe_allow_html=True)
-
+    
         df_aux=df.drop_duplicates(subset=['restaurant_id'])
         df_aux = (df.loc[:, ['country', 'restaurant_id']].groupby('country')
                                                       .count()
@@ -379,6 +393,30 @@ else:
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
+
+        # with col2:
+        #     # if 'All' in cuisines:
+        #     st.markdown("<h3 style='text-align: center;'>Unique cuisines</h3>",unsafe_allow_html=True)
+        #     # else:
+        #         # st.markdown("<h3 style='text-align: center;'>Cuisine total</h3>",unsafe_allow_html=True)
+    
+        #     df2=df[['cuisines','country']]
+        #     df2=df2.assign(all=df2['cuisines'].str.split(',')).explode('all')
+        #     df2['all']= df2['all'].replace(' ','', regex=True)
+        #     df2=df2.drop(columns=['cuisines'])
+        #     df2=df2[['country','all']]
+        #     df2=df2.drop_duplicates(ignore_index=True)
+        #     df2 = (df2.loc[:, ['country', 'all']].groupby('country')
+        #                                                 .count()
+        #                                                 .sort_values('all',ascending=False)
+        #                                                 .reset_index())
+            
+        #     fig=px.bar(df2, x='all', y='country',category_orders={'country': df2['country'].tolist()})
+            
+        #     fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+        #                       yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
+            
+        #     st.plotly_chart(fig,use_container_width=True)
 
 
 with st.container():
@@ -506,7 +544,33 @@ with st.container():
                                   yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
         
             st.plotly_chart(fig,use_container_width=True)
+
+        elif reset_button:
+
+            # df2=df.copy()
+            df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
+            df2=df2.drop_duplicates(ignore_index=True)
+            
+            df3=df2[['country','cuisine']].groupby('country').value_counts().reset_index()
+            # df3=df3.loc[df3.groupby('country')['count'].idxmax()].sort_values('count',ascending=False)
+            
+            # Calcular a soma total de cada grupo (país)
+            total_counts = df3.groupby('country')['count'].sum()
+            
+            # Adicionar uma nova coluna com a porcentagem
+            df3['percentage'] = df3.apply(lambda row: (row['count'] / total_counts[row['country']]) * 100, axis=1)
+            df3=df3.loc[df3.groupby('country')['count'].idxmax()].sort_values('percentage',ascending=True)
+            
+            fig = px.bar(df3, x='percentage', y='country', text='cuisine',category_orders={'percentage': df3['percentage'].tolist()},
+                         labels={'percentage': 'Percentage (%)', 'country': 'Country'},
+                         height=600)
+            
+            # Personalizar layout
+            fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                                  yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
         
+            st.plotly_chart(fig,use_container_width=True)
+            
         else:
             
             df2=df3.assign(cuisine=df3['cuisines'].str.split(',')).explode('cuisine')

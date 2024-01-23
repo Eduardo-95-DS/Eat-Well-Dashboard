@@ -146,6 +146,8 @@ df_raw['has_table_booking']=df_raw['has_table_booking'].apply(lambda x: 'Yes' if
 df_raw['has_online_delivery']=df_raw['has_online_delivery'].apply(lambda x: 'Yes' if x==1 else 'No')
 df_raw['is_delivering_now']=df_raw['is_delivering_now'].apply(lambda x: 'Yes' if x==1 else 'No')
 
+df_raw['cuisines']=df_raw['cuisines'].replace(' ','', regex=True)
+
 # df_raw=df_raw.assign(cuisine=df_raw['cuisines'].str.split(',')).explode('cuisine').rename(columns={'var1':'cuisine'})
 # df_raw=df_raw.replace(' ','', regex=True).drop_duplicates(ignore_index=True)
 
@@ -248,28 +250,33 @@ st.sidebar.markdown("""
 delivery= st.sidebar.multiselect('',['Yes','No'],
                                default=['Yes','No'],key='delivery')
 
-rows=df['is_delivering_now'].isin(online)
+rows=df['is_delivering_now'].isin(delivery)
 df=df.loc[rows,:]
 
-# filtro de culinaria
+# # filtro de culinaria
+
+# df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
+# df2['cuisine']=df2['cuisine'].replace(' ','', regex=True)
+# df2['count'] = df2.groupby('cuisine')['cuisine'].transform('count')
+# df2=df2.sort_values('count',ascending=False)
+# cuisine=df2['cuisine'].unique()
+# cuisine=np.insert(cuisine, 0, 'All')
+
+# cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
+# cuisines = [cuisines]
+
+# if cuisines == 'All':
+#     df=df.loc[(df['cuisines']==df['cuisines'])]
+# else:
+#     mascara = df['cuisines'].str.contains('|'.join(cuisines), case=False)
+#     linhas_desejadas = df[mascara]
+#     df=linhas_desejadas
+
 st.sidebar.markdown("""
     <div style="margin-bottom: -70px;">
         <span style="font-size:20px; font-weight:bold;">Cuisine</span>
     </div>
 """, unsafe_allow_html=True)
-
-# df['count'] = df.groupby('cuisine')['cuisine'].transform('count')
-# df=df.sort_values('count',ascending=False)
-# df['cuisine'] = df['cuisine'] + ' (' + df['count'].astype(str) + ')'
-# df=df.drop(columns=['count'])
-# cuisine=df['cuisine'].unique()
-# cuisine=np.insert(cuisine, 0, 'All')
-# cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
-
-# if cuisines == 'All':
-#     df=df.loc[(df['cuisine']==df['cuisine'])]
-# else:
-#     df=df.loc[(df['cuisine']==cuisines)]
 
 df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
 df2['cuisine']=df2['cuisine'].replace(' ','', regex=True)
@@ -277,16 +284,16 @@ df2['count'] = df2.groupby('cuisine')['cuisine'].transform('count')
 df2=df2.sort_values('count',ascending=False)
 cuisine=df2['cuisine'].unique()
 cuisine=np.insert(cuisine, 0, 'All')
-
 cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
 cuisines = [cuisines]
 
-if cuisines == 'All':
-    df=df.loc[(df['cuisines']==df['cuisines'])]
+if 'All' in cuisines:
+    df = df
 else:
-    mascara = df['cuisines'].str.contains('|'.join(cuisines), case=False)
+    mascara = df['cuisines'].str.contains('|'.join(cuisines), case=True)
     linhas_desejadas = df[mascara]
     df=linhas_desejadas
+
 
 # filtro de reset
 reset_button = st.sidebar.button("Reset Visualizations")
@@ -299,11 +306,105 @@ else:
 
 # plots================================================================================
 # with tab1:
-with st.container():
 
-    col1,col2=st.columns(2)
-    with col1:
-        st.markdown("<h4 style='text-align: center;'>Variety of restaurants</h4>",unsafe_allow_html=True)
+if 'All' in cuisines:
+    
+    with st.container():
+    
+        col1,col2=st.columns(2)
+        with col1:
+            st.markdown("<h4 style='text-align: center;'>Variety of restaurants</h4>",unsafe_allow_html=True)
+            # df1=df.drop_duplicates(subset=['restaurant_name'])
+    
+            df1=(df[['city','country','restaurant_name']].groupby(['city','country'])
+                                                         .count()
+                                                         .sort_values('restaurant_name',ascending=False)
+                                                         .rename(columns={'restaurant_name':'restaurants'})
+                                                         .reset_index()
+                                                         .head(12))
+            df1['count']=df1['restaurants']
+    
+            fig=px.histogram(df1, x='restaurants', y='city',text_auto=True, hover_data='country', color="country",
+                                                             category_orders={'city': df1['city'].tolist()})
+            
+            fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                              legend_title_text='',height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+    
+        with col2:
+            st.markdown("<h4 style='text-align: center;'>Variety of cuisines</h4>",unsafe_allow_html=True)
+            df2=df[['cuisines','city','country']]
+            df2=df2.assign(cuisine=df2['cuisines'].str.split(',')).explode('cuisine')
+            df2['cuisine']= df2['cuisine'].replace(' ','', regex=True)
+            df2=df2[['city','country','cuisine']]
+            df2=df2.drop_duplicates(ignore_index=True)
+            df_aux = (df2.loc[:, ['city','country' ,'cuisine']].groupby(['city','country'])
+                                                            .count()
+                                                            .sort_values('cuisine',ascending=False)
+                                                            .head(10)
+                                                            .reset_index())
+    
+            fig=px.histogram(df_aux, x='cuisine', y='city', text_auto=True, hover_data='country', color="country",
+                                                             category_orders={'city': df_aux['city'].tolist()})
+            
+            fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                              legend_title_text='',height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+
+elif reset_button:
+
+    with st.container():
+    
+        col1,col2=st.columns(2)
+        with col1:
+            st.markdown("<h4 style='text-align: center;'>Variety of restaurants</h4>",unsafe_allow_html=True)
+            # df1=df.drop_duplicates(subset=['restaurant_name'])
+    
+            df1=(df[['city','country','restaurant_name']].groupby(['city','country'])
+                                                         .count()
+                                                         .sort_values('restaurant_name',ascending=False)
+                                                         .rename(columns={'restaurant_name':'restaurants'})
+                                                         .reset_index()
+                                                         .head(12))
+            df1['count']=df1['restaurants']
+    
+            fig=px.histogram(df1, x='restaurants', y='city',text_auto=True, hover_data='country', color="country",
+                                                             category_orders={'city': df1['city'].tolist()})
+            
+            fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                              legend_title_text='',height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+    
+        with col2:
+            st.markdown("<h4 style='text-align: center;'>Variety of cuisines</h4>",unsafe_allow_html=True)
+            df2=df[['cuisines','city','country']]
+            df2=df2.assign(cuisine=df2['cuisines'].str.split(',')).explode('cuisine')
+            df2['cuisine']= df2['cuisine'].replace(' ','', regex=True)
+            df2=df2[['city','country','cuisine']]
+            df2=df2.drop_duplicates(ignore_index=True)
+            df_aux = (df2.loc[:, ['city','country' ,'cuisine']].groupby(['city','country'])
+                                                            .count()
+                                                            .sort_values('cuisine',ascending=False)
+                                                            .head(10)
+                                                            .reset_index())
+    
+            fig=px.histogram(df_aux, x='cuisine', y='city', text_auto=True, hover_data='country', color="country",
+                                                             category_orders={'city': df_aux['city'].tolist()})
+            
+            fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
+                              legend_title_text='',height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+
+else:
+        st.markdown("<h4 style='text-align: center;'>Restaurants</h4>",unsafe_allow_html=True)
         # df1=df.drop_duplicates(subset=['restaurant_name'])
 
         df1=(df[['city','country','restaurant_name']].groupby(['city','country'])
@@ -316,28 +417,6 @@ with st.container():
 
         fig=px.histogram(df1, x='restaurants', y='city',text_auto=True, hover_data='country', color="country",
                                                          category_orders={'city': df1['city'].tolist()})
-        
-        fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                          yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
-                          legend_title_text='',height=500,margin=dict(t=0))
-        
-        st.plotly_chart(fig,use_container_width=True)
-
-    with col2:
-        st.markdown("<h4 style='text-align: center;'>Variety of cuisines</h4>",unsafe_allow_html=True)
-        df2=df[['cuisines','city','country']]
-        df2=df2.assign(cuisine=df2['cuisines'].str.split(',')).explode('cuisine')
-        df2= df2.replace(' ','', regex=True)
-        df2=df2[['city','country','cuisine']]
-        df2=df2.drop_duplicates(ignore_index=True)
-        df_aux = (df2.loc[:, ['city','country' ,'cuisine']].groupby(['city','country'])
-                                                        .count()
-                                                        .sort_values('cuisine',ascending=False)
-                                                        .head(10)
-                                                        .reset_index())
-
-        fig=px.histogram(df_aux, x='cuisine', y='city', text_auto=True, hover_data='country', color="country",
-                                                         category_orders={'city': df_aux['city'].tolist()})
         
         fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
                           yaxis_tickfont=dict(size=15),legend=dict(font=dict(size=15)), 
@@ -395,6 +474,7 @@ with st.container():
             
     with col2:
         st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Average rating < 4</h4>",unsafe_allow_html=True)
+        
         df1 = df[(df['aggregate_rating']<4.0) & (df['votes']>3)]
         df2 = df[['city', 'country', 'restaurant_id']].groupby(['city', 'country']).count().reset_index()  # total de restaurantes por cidade
         
