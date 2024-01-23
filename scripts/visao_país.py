@@ -131,7 +131,7 @@ df_raw['is_delivering_now']=df_raw['is_delivering_now'].apply(lambda x: 'Yes' if
 df_raw['cuisines']=df_raw['cuisines'].replace(' ','', regex=True)
 
 df=df_raw.copy()
-
+df3=df_raw.copy()
 # Barra lateral=====================================================================
 st.set_page_config(layout='wide')
 # st.dataframe(df)
@@ -155,8 +155,12 @@ st.sidebar.markdown("""
 price= st.sidebar.multiselect('',['cheap','normal','expensive','gourmet'],
                                default=['cheap','normal','expensive','gourmet'],key='multiselect')
 
-rows=df['price_range'].isin(price)
-df=df.loc[rows,:]
+rows1=df['price_range'].isin(price)
+rows2=df3['price_range'].isin(price)
+
+df=df.loc[rows1,:]
+df3=df3.loc[rows2,:]
+
 # rows2=df2['price_range'].isin(price)
 # df2=df2.loc[rows2,:]
 
@@ -174,10 +178,16 @@ booking= st.sidebar.multiselect('',['Yes','No'],
 # df=df.loc[rows,:]
 
 if not booking:
-    rows = ~df['has_table_booking'].isna()
+    rows1 = ~df['has_table_booking'].isna()
+    rows2 = ~df3['has_table_booking'].isna()
+
 else:
-    rows = df['has_table_booking'].isin(booking)
-    
+    rows1 = df['has_table_booking'].isin(booking)
+    rows2 = df3['has_table_booking'].isin(booking)
+
+df = df.loc[rows1, :]
+df3 = df3.loc[rows2, :]
+
 # filtro de online delivery
 st.sidebar.markdown("""
     <div style="margin-bottom: -70px;">
@@ -192,11 +202,17 @@ online= st.sidebar.multiselect('',['Yes','No'],
 # df=df.loc[rows,:]
 
 if not online:
-    rows = ~df['has_online_delivery'].isna()
-else:
-    rows = df['has_online_delivery'].isin(online)
+    rows1 = ~df['has_online_delivery'].isna()
+    rows2 = ~df3['has_online_delivery'].isna()
 
-df = df.loc[rows, :]
+else:
+    rows1 = df['has_online_delivery'].isin(online)
+    rows2 = df3['has_online_delivery'].isin(online)
+
+df = df.loc[rows1, :]
+df3 = df3.loc[rows2, :]
+
+
 # filtro de delivering now
 st.sidebar.markdown("""
     <div style="margin-bottom: -70px;">
@@ -211,9 +227,15 @@ delivery= st.sidebar.multiselect('',['Yes','No'],
 # df=df.loc[rows,:]
 
 if not delivery:
-    rows = ~df['is_delivering_now'].isna()
+    rows1 = ~df['is_delivering_now'].isna()
+    rows2 = ~df3['is_delivering_now'].isna()
+
 else:
-    rows = df['is_delivering_now'].isin(delivery)
+    rows1 = df['is_delivering_now'].isin(delivery)
+    rows2 = df3['is_delivering_now'].isin(delivery)
+
+df = df.loc[rows1, :]
+df3 = df.loc[rows2, :]
 
 # filtro de culinaria
 st.sidebar.markdown("""
@@ -229,12 +251,13 @@ df2=df2.sort_values('count',ascending=False)
 cuisine=df2['cuisine'].unique()
 cuisine=np.insert(cuisine, 0, 'All')
 cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
+cuisine1=cuisines
 cuisines = [cuisines]
 
 if 'All' in cuisines:
     df = df
 else:
-    mascara = df['cuisines'].str.contains('|'.join(cuisines), case=False)
+    mascara = df['cuisines'].str.contains('|'.join(cuisines), case=True)
     linhas_desejadas = df[mascara]
     df=linhas_desejadas
     
@@ -248,10 +271,100 @@ else:
 
 # plots===================================================================================
 # with tab1:
-with st.container():
 
-    col1,col2=st.columns(2)
-    with col1:
+if 'All' in cuisines:
+
+    with st.container():
+    
+        col1,col2=st.columns(2)
+        with col1:
+            st.markdown("<h3 style='text-align: center;'>N° of restaurants</h3>",unsafe_allow_html=True)
+    
+            df_aux=df.drop_duplicates(subset=['restaurant_id'])
+            df_aux = (df.loc[:, ['country', 'restaurant_id']].groupby('country')
+                                                          .count()
+                                                          .sort_values('restaurant_id',ascending=False)
+                                                          .reset_index())
+            
+            fig=px.bar(df_aux, x='restaurant_id', y='country', category_orders={'country': df_aux['country'].tolist()})
+            
+            fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+                
+        with col2:
+            # if 'All' in cuisines:
+            st.markdown("<h3 style='text-align: center;'>Unique cuisines</h3>",unsafe_allow_html=True)
+            # else:
+                # st.markdown("<h3 style='text-align: center;'>Cuisine total</h3>",unsafe_allow_html=True)
+    
+            df2=df[['cuisines','country']]
+            df2=df2.assign(all=df2['cuisines'].str.split(',')).explode('all')
+            df2= df2.replace(' ','', regex=True)
+            df2=df2.drop(columns=['cuisines'])
+            df2=df2[['country','all']]
+            df2=df2.drop_duplicates(ignore_index=True)
+            df2 = (df2.loc[:, ['country', 'all']].groupby('country')
+                                                        .count()
+                                                        .sort_values('all',ascending=False)
+                                                        .reset_index())
+            
+            fig=px.bar(df2, x='all', y='country',category_orders={'country': df2['country'].tolist()})
+            
+            fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+
+elif reset_button:
+
+    with st.container():
+    
+        col1,col2=st.columns(2)
+        with col1:
+            st.markdown("<h3 style='text-align: center;'>N° of restaurants</h3>",unsafe_allow_html=True)
+    
+            df_aux=df.drop_duplicates(subset=['restaurant_id'])
+            df_aux = (df.loc[:, ['country', 'restaurant_id']].groupby('country')
+                                                          .count()
+                                                          .sort_values('restaurant_id',ascending=False)
+                                                          .reset_index())
+            
+            fig=px.bar(df_aux, x='restaurant_id', y='country', category_orders={'country': df_aux['country'].tolist()})
+            
+            fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+                
+        with col2:
+            # if 'All' in cuisines:
+            st.markdown("<h3 style='text-align: center;'>Unique cuisines</h3>",unsafe_allow_html=True)
+            # else:
+                # st.markdown("<h3 style='text-align: center;'>Cuisine total</h3>",unsafe_allow_html=True)
+    
+            df2=df[['cuisines','country']]
+            df2=df2.assign(all=df2['cuisines'].str.split(',')).explode('all')
+            df2= df2.replace(' ','', regex=True)
+            df2=df2.drop(columns=['cuisines'])
+            df2=df2[['country','all']]
+            df2=df2.drop_duplicates(ignore_index=True)
+            df2 = (df2.loc[:, ['country', 'all']].groupby('country')
+                                                        .count()
+                                                        .sort_values('all',ascending=False)
+                                                        .reset_index())
+            
+            fig=px.bar(df2, x='all', y='country',category_orders={'country': df2['country'].tolist()})
+            
+            fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+else:
+
+    with st.container():
+    
         st.markdown("<h3 style='text-align: center;'>N° of restaurants</h3>",unsafe_allow_html=True)
 
         df_aux=df.drop_duplicates(subset=['restaurant_id'])
@@ -266,27 +379,7 @@ with st.container():
                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
         
         st.plotly_chart(fig,use_container_width=True)
-            
-    with col2:
-        st.markdown("<h3 style='text-align: center;'>Cuisines total</h3>",unsafe_allow_html=True)
-        
-        df2=df[['cuisines','country']]
-        df2=df2.assign(all=df2['cuisines'].str.split(',')).explode('all')
-        df2= df2.replace(' ','', regex=True)
-        df2=df2.drop(columns=['cuisines'])
-        df2=df2[['country','all']]
-        df2=df2.drop_duplicates(ignore_index=True)
-        df2 = (df2.loc[:, ['country', 'all']].groupby('country')
-                                                    .count()
-                                                    .sort_values('all',ascending=False)
-                                                    .reset_index())
-        
-        fig=px.bar(df2, x='all', y='country',category_orders={'country': df2['country'].tolist()})
-        
-        fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                          yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
-        
-        st.plotly_chart(fig,use_container_width=True)
+
 
 with st.container():
 
@@ -327,61 +420,113 @@ with st.container():
     with col1:
         
         st.markdown("<h3 style='text-align: center;'>Price range</h3>",unsafe_allow_html=True)
-        
-        # df_aux=df.drop_duplicates(subset=['restaurant_id'])
-        df_aux = (df.loc[:, ['country', 'price_range']].groupby('country')
-                                                      .value_counts()
-                                                      .sort_values(ascending=False)
-                                                      .reset_index())
-        
-        df_aux['percentage'] = df_aux.groupby('country')['count'].transform(lambda x: x / x.sum() * 100)
-        df_aux = df_aux.sort_values(by=['percentage'], ascending=True)
-        
-        ordered_countries = df_aux[df_aux['price_range'] == 'gourmet']['country'].tolist()
-        category_order = ['gourmet', 'expensive', 'normal', 'cheap']
-        color_mapping = {'cheap': 'deepskyblue', 'normal': 'dodgerblue', 'expensive': 'mediumblue', 'gourmet': 'darkblue'}
-    
-        fig=px.histogram(df_aux, x='count', y='country', hover_data='price_range', color="price_range",
-                                                     barnorm='percent',
-                                                     category_orders={'price_range': category_order},
-                                                     color_discrete_map=color_mapping)
 
-        fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),
-                          yaxis=dict(title=''),
-                          xaxis_tickfont=dict(size=15), yaxis_tickfont=dict(size=15),
-                          legend=dict(font=dict(size=15)), legend_title_text='',height=500,margin=dict(t=0))
+        if 'All' in cuisines:
+
+            # df_aux=df.drop_duplicates(subset=['restaurant_id'])
+            df_aux = (df.loc[:, ['country', 'price_range']].groupby('country')
+                                                          .value_counts()
+                                                          .sort_values(ascending=False)
+                                                          .reset_index())
+            
+            df_aux['percentage'] = df_aux.groupby('country')['count'].transform(lambda x: x / x.sum() * 100)
+            df_aux = df_aux.sort_values(by=['percentage'], ascending=False)
+            
+            # ordered_countries = df_aux[df_aux['price_range'] == 'gourmet']['country'].tolist()
+            category_order = ['gourmet', 'expensive', 'normal', 'cheap']
+            color_mapping = {'cheap': 'deepskyblue', 'normal': 'dodgerblue', 'expensive': 'mediumblue', 'gourmet': 'darkblue'}
         
-        st.plotly_chart(fig,use_container_width=True)
-                
+            fig=px.histogram(df_aux, x='count', y='country', hover_data='price_range', color="price_range",
+                                                         barnorm='percent',
+                                                         category_orders={'price_range': category_order},
+                                                         color_discrete_map=color_mapping)
+    
+            fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),
+                              yaxis=dict(title=''),
+                              xaxis_tickfont=dict(size=15), yaxis_tickfont=dict(size=15),
+                              legend=dict(font=dict(size=15)), legend_title_text='',height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+
+        else:
+
+            df_aux = (df.loc[:, ['country', 'price_range']].groupby('country')
+                                              .value_counts()
+                                              .sort_values(ascending=False)
+                                              .reset_index())
+            
+            df_aux['percentage'] = df_aux.groupby('country')['count'].transform(lambda x: x / x.sum() * 100)
+            df_aux = df_aux.sort_values(by=['percentage','price_range'], ascending=False)
+            
+            df_sorted_gourmet = df_aux[df_aux['price_range'] == 'gourmet'].sort_values(by='percentage', ascending=False)
+            df_sorted_other = df_aux[df_aux['price_range'] != 'gourmet']
+            df_sorted = pd.concat([df_sorted_gourmet, df_sorted_other])
+            
+            category_order = ['gourmet', 'expensive', 'normal', 'cheap']
+            color_mapping = {'cheap': 'deepskyblue', 'normal': 'dodgerblue', 'expensive': 'mediumblue', 'gourmet': 'darkblue'}
+            
+            fig=px.histogram(df_aux, x='count', y='country', hover_data='price_range', color="price_range",
+                                                         barnorm='percent',
+                                                         category_orders={'price_range': category_order},
+                                                         color_discrete_map=color_mapping)
+            
+            fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),
+                              yaxis=dict(title=''),
+                              xaxis_tickfont=dict(size=15), yaxis_tickfont=dict(size=15),
+                              legend=dict(font=dict(size=15)), legend_title_text='',height=500,margin=dict(t=0))
+            
+            st.plotly_chart(fig,use_container_width=True)
+            
     with col2:
-        
-        st.markdown("<h3 style='text-align: center;'>Most common cuisines</h3>",unsafe_allow_html=True)
 
-        # df2=df.copy()
-        df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
-        df2=df2.drop_duplicates(ignore_index=True)
-        
-        df3=df2[['country','cuisine']].groupby('country').value_counts().reset_index()
-        df3.loc[df3.groupby('country')['count'].idxmax()].sort_values('count',ascending=False)
-        
-        # Calcular a soma total de cada grupo (país)
-        total_counts = df3.groupby('country')['count'].sum()
-        
-        # Adicionar uma nova coluna com a porcentagem
-        df3['percentage'] = df3.apply(lambda row: (row['count'] / total_counts[row['country']]) * 100, axis=1)
-        df3=df3.loc[df3.groupby('country')['count'].idxmax()].sort_values('percentage',ascending=True)
-        
-        fig = px.bar(df3, x='percentage', y='country', text='cuisine',category_orders={'percentage': df3['percentage'].tolist()},
-                     labels={'percentage': 'Percentage (%)', 'country': 'Country'},
-                     height=600)
-        
-        # Personalizar layout
-        fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
-    
-        st.plotly_chart(fig,use_container_width=True)
+        st.markdown("<h3 style='text-align: center;'>Proportion</h3>",unsafe_allow_html=True)
 
-
+        if 'All' in cuisines:
+        
+            # df2=df.copy()
+            df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
+            df2=df2.drop_duplicates(ignore_index=True)
+            
+            df3=df2[['country','cuisine']].groupby('country').value_counts().reset_index()
+            # df3=df3.loc[df3.groupby('country')['count'].idxmax()].sort_values('count',ascending=False)
+            
+            # Calcular a soma total de cada grupo (país)
+            total_counts = df3.groupby('country')['count'].sum()
+            
+            # Adicionar uma nova coluna com a porcentagem
+            df3['percentage'] = df3.apply(lambda row: (row['count'] / total_counts[row['country']]) * 100, axis=1)
+            df3=df3.loc[df3.groupby('country')['count'].idxmax()].sort_values('percentage',ascending=True)
+            
+            fig = px.bar(df3, x='percentage', y='country', text='cuisine',category_orders={'percentage': df3['percentage'].tolist()},
+                         labels={'percentage': 'Percentage (%)', 'country': 'Country'},
+                         height=600)
+            
+            # Personalizar layout
+            fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                                  yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
+        
+            st.plotly_chart(fig,use_container_width=True)
+        
+        else:
+            
+            df2=df3.assign(cuisine=df3['cuisines'].str.split(',')).explode('cuisine')
+            df2=df2.drop_duplicates(ignore_index=True)
+            
+            df3=df2[['country','cuisine']].groupby('country').value_counts().reset_index()
+            df3['sum'] = df3.groupby('country')['count'].transform('sum')
+            df3=df3[df3['cuisine']==cuisine1]
+            df3['percentage'] = df3.apply(lambda row: (row['count'] *100) / row['sum'], axis=1)
+            df3=df3.sort_values('percentage',ascending=False)
+            
+            fig = px.bar(df3, x='percentage', y='country',category_orders={'country': df3['country'].tolist()},
+                         labels={'percentage': 'Percentage (%)', 'country': 'Country'},
+                         height=600)
+            
+            # Personalizar layout
+            fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                                  yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
+        
+            st.plotly_chart(fig,use_container_width=True)
 
 
 
