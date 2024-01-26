@@ -144,13 +144,13 @@ with st.container():
         
         st.markdown("<h3 style='text-align: center;'>Highest average cost for two</h3>",unsafe_allow_html=True)
 
-        highest_cost(df)
+        avg_cost(df,False)
             
     with col2:
         
         st.markdown("<h3 style='text-align: center;'>Lowest average cost for two</h3>",unsafe_allow_html=True)
 
-        lowest_cost(df)
+        avg_cost(df,True)
 
 with st.container():
 
@@ -159,13 +159,13 @@ with st.container():
         
         st.markdown("<h3 style='text-align: center;'>Best average rating</h3>",unsafe_allow_html=True)
 
-        best_rating(df)
+        rating(df,False)
             
     with col2:
         
         st.markdown("<h3 style='text-align: center;'>Worse average rating</h3>",unsafe_allow_html=True)
 
-        worse_rating(df)
+        rating(df,True)
 
 with st.container():
 

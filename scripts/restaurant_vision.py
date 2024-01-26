@@ -164,14 +164,14 @@ with st.container():
 with st.container():
 
     st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Highest average cost for two</h4>",unsafe_allow_html=True)
-        
-    highest_avg(df)
 
+    avg_cost(df,False)
+    
 with st.container():
 
     st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Lowest average cost for two</h4>",unsafe_allow_html=True)
-        
-    lowest_avg(df)
+
+    avg_cost(df,True)
 
 
 
