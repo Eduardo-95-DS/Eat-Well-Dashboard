@@ -12,6 +12,7 @@ def create_cuisine(df):
     df2=df2.drop_duplicates(ignore_index=True)
     return df2
 
+# plots==================================================================
 def avg_cost (df,ordering):
     df2=create_cuisine(df)
 

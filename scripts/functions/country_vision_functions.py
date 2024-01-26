@@ -5,6 +5,11 @@ from folium.plugins import MarkerCluster,MousePosition
 import plotly.express as px
 import plotly.graph_objects as go
 
+def cuisine (df):
+    df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
+    df2=df2.drop_duplicates(ignore_index=True)
+    return df2
+    
 # plots==================================================================
 def restaurants_number (df):
     df_aux = (df.loc[:, ['country', 'restaurant_id']].groupby('country')
@@ -20,18 +25,14 @@ def restaurants_number (df):
     st.plotly_chart(fig,use_container_width=True)
 
 def unique_cuisines (df):
-    df2=df[['cuisines','country']]
-    df2=df2.assign(all=df2['cuisines'].str.split(',')).explode('all')
-    df2['all']= df2['all'].replace(' ','', regex=True)
-    df2=df2.drop(columns=['cuisines'])
-    df2=df2[['country','all']]
-    df2=df2.drop_duplicates(ignore_index=True)
-    df2 = (df2.loc[:, ['country', 'all']].groupby('country')
+    df2=cuisine(df)
+    df2=df2[['cuisine','country']]
+    df2 = (df2.loc[:, ['country', 'cuisine']].groupby('country')
                                                 .count()
-                                                .sort_values('all',ascending=False)
+                                                .sort_values('cuisine',ascending=False)
                                                 .reset_index())
     
-    fig=px.bar(df2, x='all', y='country',category_orders={'country': df2['country'].tolist()})
+    fig=px.bar(df2, x='cuisine', y='country',category_orders={'country': df2['country'].tolist()})
     
     fig.update_layout(xaxis=dict(title='Count',title_font=dict(size=20)), yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
                       yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0))
@@ -89,41 +90,35 @@ def price_range(df):
     st.plotly_chart(fig,use_container_width=True)
 
 def cuisine_country_proportion (df):
+    df2=cuisine(df)
+    df3=df2[['country','cuisine']].groupby('country').value_counts().reset_index()
     
-        df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
-        df2=df2.drop_duplicates(ignore_index=True)
-        
-        df3=df2[['country','cuisine']].groupby('country').value_counts().reset_index()
-        
-        # Calcular a soma total de cada grupo (país)
-        total_counts = df3.groupby('country')['count'].sum()
-        
-        # Adicionar uma nova coluna com a porcentagem
-        df3['percentage'] = df3.apply(lambda row: (row['count'] / total_counts[row['country']]) * 100, axis=1)
-        df3=df3.loc[df3.groupby('country')['count'].idxmax()].sort_values('percentage',ascending=True)
-        
-        fig = px.bar(df3, x='percentage', y='country', text='cuisine',category_orders={'percentage': df3['percentage'].tolist()},
-                     labels={'percentage': 'Percentage (%)', 'country': 'Country'},
-                     height=600)
-        
-        # Personalizar layout
-        fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                              yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
+    # Calcular a soma total de cada grupo (país)
+    total_counts = df3.groupby('country')['count'].sum()
     
-        st.plotly_chart(fig,use_container_width=True)
+    # Adicionar uma nova coluna com a porcentagem
+    df3['percentage'] = df3.apply(lambda row: (row['count'] / total_counts[row['country']]) * 100, axis=1)
+    df3=df3.loc[df3.groupby('country')['count'].idxmax()].sort_values('percentage',ascending=True)
+    
+    fig = px.bar(df3, x='percentage', y='country', text='cuisine',category_orders={'percentage': df3['percentage'].tolist()},
+                 labels={'percentage': 'Percentage (%)', 'country': 'Country'},
+                 height=600)
+    
+    # Personalizar layout
+    fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+                          yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
+
+    st.plotly_chart(fig,use_container_width=True)
 
 def selected_cuisine_country_proportion (df3,cuisine1):
+    df4=cuisine(df3)
+    df5=df4[['country','cuisine']].groupby('country').value_counts().reset_index()
+    df5['sum'] = df5.groupby('country')['count'].transform('sum')
+    df5=df5[df5['cuisine']==cuisine1]
+    df5['percentage'] = df5.apply(lambda row: (row['count'] *100) / row['sum'], axis=1)
+    df5=df5.sort_values('percentage',ascending=False)
     
-    df2=df3.assign(cuisine=df3['cuisines'].str.split(',')).explode('cuisine')
-    df2=df2.drop_duplicates(ignore_index=True)
-    
-    df3=df2[['country','cuisine']].groupby('country').value_counts().reset_index()
-    df3['sum'] = df3.groupby('country')['count'].transform('sum')
-    df3=df3[df3['cuisine']==cuisine1]
-    df3['percentage'] = df3.apply(lambda row: (row['count'] *100) / row['sum'], axis=1)
-    df3=df3.sort_values('percentage',ascending=False)
-    
-    fig = px.bar(df3, x='percentage', y='country',category_orders={'country': df3['country'].tolist()},
+    fig = px.bar(df5, x='percentage', y='country',category_orders={'country': df5['country'].tolist()},
                  labels={'percentage': 'Percentage (%)', 'country': 'Country'},
                  height=600)
     

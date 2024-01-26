@@ -7,7 +7,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # plots==========================================================
-
 def restaurant_variety (df):
     df1=(df[['city','country','restaurant_name']].groupby(['city','country'])
                                                          .count()
