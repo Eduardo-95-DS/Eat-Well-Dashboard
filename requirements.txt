@@ -112,6 +112,7 @@ soupsieve==2.5
 stack-data==0.6.3
 statsmodels==0.14.1
 streamlit==1.29.0
+streamlit-folium==0.18.0
 tangled-up-in-unicode==0.2.0
 tenacity==8.2.3
 terminado==0.18.0
