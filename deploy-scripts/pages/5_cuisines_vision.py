@@ -19,7 +19,7 @@ st.set_page_config(layout='wide')
 
 image_path='image/logo.jpg'
 image=Image.open(image_path)
-st.sidebar.image(image,width=150,use_column_width="always")
+st.sidebar.image(image,width=180)
 
 st.markdown("<h1 style='text-align: center;'>Cuisine Vision</h1>",unsafe_allow_html=True)
 st.sidebar.markdown('# Eat Well Company')

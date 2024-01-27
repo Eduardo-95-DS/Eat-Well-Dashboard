@@ -8,7 +8,7 @@ from pages.functions.country_vision_functions import *
 # load dataset
 df_raw=pd.read_csv('data/zomato_raw.csv')
 
-# cleaning
+# cleaning=========================================================================
 df_raw=cleaning(df_raw)
 
 df=df_raw.copy()
@@ -19,7 +19,7 @@ st.set_page_config(layout='wide')
 
 image_path='image/logo.jpg'
 image=Image.open(image_path)
-st.sidebar.image(image,width=150,use_column_width="always")
+st.sidebar.image(image,width=180)
 
 st.sidebar.markdown('# Eat Well Company')
 st.sidebar.markdown("""---""")

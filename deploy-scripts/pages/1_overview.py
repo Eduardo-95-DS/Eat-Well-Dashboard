@@ -8,6 +8,7 @@ df_raw=pd.read_csv('data/zomato_raw.csv')
 
 st.set_page_config(layout='wide')
 
+# cleaning=========================================================================
 df_raw=cleaning(df_raw)
 
 df=df_raw.copy()
@@ -16,7 +17,7 @@ df=df_raw.copy()
 
 image_path='image/logo.jpg'
 image=Image.open(image_path)
-st.sidebar.image(image,width=150,use_column_width="always")
+st.sidebar.image(image,width=180)
 
 st.sidebar.markdown('# Eat Well Company')
 st.sidebar.markdown("""---""")
