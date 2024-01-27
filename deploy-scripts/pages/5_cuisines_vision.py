@@ -13,15 +13,14 @@ df_raw=cleaning(df_raw)
 
 df=df_raw.copy()
 
-# Barra lateral=====================================================================
-st.set_page_config(layout='wide')
-# st.dataframe(df)
+st.set_page_config(page_title='Cuisine Vision',page_icon='🥘',layout='wide')
 
+# Barra lateral=====================================================================
 image_path='image/logo.jpg'
 image=Image.open(image_path)
 st.sidebar.image(image,width=180)
 
-st.markdown("<h1 style='text-align: center;'>Cuisine Vision</h1>",unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>Cuisines Vision</h1>",unsafe_allow_html=True)
 st.sidebar.markdown('# Eat Well Company')
 st.sidebar.markdown("""---""")
 

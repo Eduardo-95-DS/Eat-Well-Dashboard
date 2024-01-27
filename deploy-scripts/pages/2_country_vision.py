@@ -14,9 +14,9 @@ df_raw=cleaning(df_raw)
 df=df_raw.copy()
 df3=df_raw.copy()
 
-# Barra lateral=====================================================================
-st.set_page_config(layout='wide')
+st.set_page_config(page_title='Country Vision',page_icon='🌏',layout='wide')
 
+# Barra lateral=====================================================================
 image_path='image/logo.jpg'
 image=Image.open(image_path)
 st.sidebar.image(image,width=180)
