@@ -16,7 +16,7 @@ df=df_raw.copy()
 # Barra lateral=====================================================================
 st.set_page_config(layout='wide')
 
-image_path='../image/logo.jpg'
+image_path='image/logo.jpg'
 image=Image.open(image_path)
 st.sidebar.image(image,width=150,use_column_width="always")
 

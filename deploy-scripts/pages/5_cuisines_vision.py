@@ -17,7 +17,7 @@ df=df_raw.copy()
 st.set_page_config(layout='wide')
 # st.dataframe(df)
 
-image_path='../image/logo.jpg'
+image_path='image/logo.jpg'
 image=Image.open(image_path)
 st.sidebar.image(image,width=150,use_column_width="always")
 
