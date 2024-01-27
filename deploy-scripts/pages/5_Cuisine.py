@@ -3,24 +3,23 @@ import numpy as np
 import streamlit as st
 from PIL import Image
 from pages.functions.overview_functions import *
-from pages.functions.city_vision_functions import *
+from pages.functions.cuisines_vision_functions import *
 
 # load dataset
 df_raw=pd.read_csv('data/zomato_raw.csv')
 
-# cleaning=========================================================================
+# cleaning==============================================
 df_raw=cleaning(df_raw)
 
 df=df_raw.copy()
 
-st.set_page_config(page_title='City Vision',page_icon='🏙',layout='wide')
+st.set_page_config(page_title='Cuisine Vision',page_icon='🥘',layout='wide')
 
 # Barra lateral=====================================================================
 image_path='image/logo.jpg'
 image=Image.open(image_path)
 st.sidebar.image(image,width=180)
 
-st.markdown("<h1 style='text-align: center;'>City Vision</h1>",unsafe_allow_html=True)
 st.sidebar.markdown('# Eat Well Company')
 st.sidebar.markdown("""---""")
 
@@ -32,7 +31,7 @@ st.sidebar.markdown("""
 """, unsafe_allow_html=True)
 
 countries = ['All','United States of America', 'Canada', 'Brazil', 'England','Australia', 'New Zealand', 'Philippines', 'Indonesia',
-    'India', 'Sri Lanka', 'United Arab Emirates', 'Qatar','Turkey', 'Singapore','South Africa']
+    'India', 'Sri Lanka', 'United Arab Emirates', 'Qatar','Turkey', 'Singapure','South Africa']
 country = st.sidebar.selectbox('country', countries,label_visibility="hidden")
 
 if country == 'All':
@@ -55,7 +54,7 @@ if city == 'All':
     df=df.loc[(df['city']==df['city'])]
 else:
     df=df.loc[(df['city']==city)]
-
+    
 # filtro de preço
 st.sidebar.markdown("""
     <div style="margin-bottom: -70px;">
@@ -109,23 +108,23 @@ rows=df['is_delivering_now'].isin(delivery)
 df=df.loc[rows,:]
 
 # # filtro de culinaria
-st.sidebar.markdown("""
-    <div style="margin-bottom: -70px;">
-        <span style="font-size:20px; font-weight:bold;">Cuisine</span>
-    </div>
-""", unsafe_allow_html=True)
+# st.sidebar.markdown("""
+#     <div style="margin-bottom: -70px;">
+#         <span style="font-size:20px; font-weight:bold;">Cuisine</span>
+#     </div>
+# """, unsafe_allow_html=True)
 
-cuisine=cuisine_filter(df)
-cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
+# cuisine=cuisine_filter(df)
+# cuisines = st.sidebar.selectbox('cuisine', cuisine, label_visibility="hidden")
 
-cuisines = [cuisines]
+# cuisines = [cuisines]
 
-if 'All' in cuisines:
-    df = df
-else:
-    mascara = df['cuisines'].str.contains('|'.join(cuisines), case=True)
-    linhas_desejadas = df[mascara]
-    df=linhas_desejadas
+# if 'All' in cuisines:
+#     df = df
+# else:
+#     mascara = df['cuisines'].str.contains('|'.join(cuisines), case=True)
+#     linhas_desejadas = df[mascara]
+#     df=linhas_desejadas
 
 # filtro de reset
 reset_button = st.sidebar.button("Reset Visualizations")
@@ -135,73 +134,44 @@ if reset_button:
 else:
     print('')
 
-# plots================================================================================
+# st.markdown("<h1 style='text-align: center;'>Cuisine Vision</h1>",unsafe_allow_html=True)
 
-if 'All' in cuisines or reset_button:
-    
-    with st.container():
-    
-        col1,col2=st.columns(2)
-        with col1:
-            
-            st.markdown("<h4 style='text-align: center;'>Variety of restaurants</h4>",unsafe_allow_html=True)
-
-            restaurant_variety(df)
-    
-        with col2:
-            
-            st.markdown("<h4 style='text-align: center;'>Variety of cuisines</h4>",unsafe_allow_html=True)
-
-            cuisine_variety(df)
-
-else:
-    
-    st.markdown("<h4 style='text-align: center;'>Restaurants</h4>",unsafe_allow_html=True)
-
-    restaurant_variety(df)
-
-
+# plots===================================================================================
 with st.container():
 
     col1,col2=st.columns(2)
-    with col1:  
+    with col1:
         
-        st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Average rating > 4.5</h4>",unsafe_allow_html=True)
-        
-        fig1,fig2=rating(df,4.5,4)
-        st.plotly_chart(fig1,use_container_width=True)
+        st.markdown("<h3 style='text-align: center;'>Highest average cost for two</h3>",unsafe_allow_html=True)
 
+        avg_cost(df,False)
+            
     with col2:
         
-        st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Average rating < 4</h4>",unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Lowest average cost for two</h3>",unsafe_allow_html=True)
 
-        st.plotly_chart(fig2,use_container_width=True)
+        avg_cost(df,True)
 
 with st.container():
 
     col1,col2=st.columns(2)
-    with col1:  
+    with col1:
         
-        st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Highest average cost for two</h4>",unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Best average rating</h3>",unsafe_allow_html=True)
 
-        average_cost(df,False)
+        rating(df,False)
             
-    with col2:  
+    with col2:
         
-        st.markdown("<h4 style='text-align:center;margin-top: 0px;'>Lowest average cost for two</h4>",unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Worse average rating</h3>",unsafe_allow_html=True)
 
-        average_cost(df,True)
+        rating(df,True)
 
+with st.container():
 
+    st.markdown("<h3 style='text-align: center;'>Most common cuisines by country</h3>",unsafe_allow_html=True)
 
-
-
-
-
-
-
-
-
+    common_cuisines(df)
 
 
 

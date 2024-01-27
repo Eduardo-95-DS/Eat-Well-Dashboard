@@ -34,7 +34,8 @@ st.sidebar.markdown('## Choose a country')
 selected_country = st.sidebar.selectbox('', countries)
 
 # plots================================================================================
-st.markdown("<h1 style='text-align: center;'>Overview</h1>",unsafe_allow_html=True)
+# st.markdown("<h1 style='text-align: center;'>Overview</h1>",unsafe_allow_html=True)
+
 with st.container():
 
     col1,col2,col3,col4,col5=st.columns(5)

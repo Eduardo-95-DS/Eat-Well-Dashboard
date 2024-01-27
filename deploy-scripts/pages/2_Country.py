@@ -131,7 +131,7 @@ if reset_button:
 else:
     print('')
 
-st.markdown("<h1 style='text-align: center;'>Country Vision</h1>",unsafe_allow_html=True)
+# st.markdown("<h1 style='text-align: center;'>Country Vision</h1>",unsafe_allow_html=True)
 
 # plots=======================================================================
 
