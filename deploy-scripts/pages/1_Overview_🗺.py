@@ -6,7 +6,7 @@ from pages.functions.overview_functions import *
 # load dataset
 df_raw=pd.read_csv('data/zomato_raw.csv')
 
-st.set_page_config(page_title='Overview 🗺',page_icon='🗺',layout='wide')
+st.set_page_config(page_title='Overview',page_icon='🗺',layout='wide')
 
 # cleaning=========================================================================
 df_raw=cleaning(df_raw)
