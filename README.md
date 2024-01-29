@@ -110,6 +110,7 @@ The creation of the dashboard was successful, featuring a comprehensive display 
 # **7. Next steps to improve**
 
 - Enhance the quality of the script's functions.
+- Create messages for when the filters generate empty plots.   
 - Optimize the loading speed of maps in the overview section.
 
 
