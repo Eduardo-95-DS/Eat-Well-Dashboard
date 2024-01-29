@@ -66,7 +66,20 @@ Which cuisine type has the most restaurants that accept online orders and offer 
 
 # **3. Solution strategy**
 
-The first step was to understand, clean, and analyze the dataset in order to answer the questions on a notebook; then, planning which information would go to the dashboard.    
+The first step was to understand, clean, and analyze the dataset in order to answer the questions on a notebook; then, planning which information would go to the dashboard.     
+
+The following metrics were chosen for each vision of the business:   
+- Country:
+  - N° of restaurants, n° of unique cuisines, average rating, average cost for two and price range.
+
+- City:
+  - N° of restaurants, n° of unique cuisines, proportion of average rating above 4.5 and below 4, highest and lowest average cost for two restaurants.
+    
+ - Restaurant:
+   - Best and worst average rating, highest and lowest average cost for two.    
+
+- Cuisines:
+  - Best and worst average rating, highest and lowest average cost for two and most common cuisines.     
 
 # **4. Top 3 data insights**
 
@@ -86,6 +99,15 @@ The first step was to understand, clean, and analyze the dataset in order to ans
  
 Online dashboard hosted in the cloud and available to any device connected to the internet.     
 It can be accessed via the following link: https://eat-well-dashboard.streamlit.app/
+
+# **6. Conclusion**
+
+The creation of the dashboard was successful, featuring a comprehensive display of tables and graphs presenting key metrics derived from the requested questions.
+
+# **7. Next steps to improve**
+
+- Enhance the quality of the script's functions.
+- Optimize the loading speed of maps in the overview section.
 
 
 
