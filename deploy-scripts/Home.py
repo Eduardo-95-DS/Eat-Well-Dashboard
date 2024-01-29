@@ -17,16 +17,8 @@ st.sidebar.markdown("""---""")
 st.write('# Eat Well Company Dashboard')
 
 st.markdown("""
-            Growth Dashboard foi construído para acompanhar as métricas de crescimento dos entregadores e dos restaurantes.
-            ### Como utilizá-lo?
-            - Visão Empresa: 
-                - Visão Gerencial: Métricas gerais de comportamento
-                - Visão Tática: Indicadores semanais de crescimento
-                - Visao Geográfica: Insights de geolocalização
-            - Visão Entregador:
-                - Acompanhamento dos indicadores semanais de crescimento 
-            - Visão Restaurante:
-                - Indicadores semanais de crescimento dos restaurantes
+            Dashbord built to accompany the main metrics of the company.
+
             ### Ask for help
                 - https://www.linkedin.com/in/eduardo-rodrigues-ds/
             """)
