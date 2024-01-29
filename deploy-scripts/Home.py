@@ -18,7 +18,6 @@ st.write('# Eat Well Company Dashboard')
 
 st.markdown("""
             Dashboard built to accompany the company's main metrics     
-            
             # How to use it?    
             
             - Overview:
