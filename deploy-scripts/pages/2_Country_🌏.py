@@ -16,13 +16,13 @@ df3=df_raw.copy()
 
 st.set_page_config(page_title='Country Vision',layout='wide')
 
-# Barra lateral=====================================================================
-image_path='image/logo.jpg'
-image=Image.open(image_path)
-st.sidebar.image(image,width=180)
+# # Barra lateral=====================================================================
+# image_path='image/logo.jpg'
+# image=Image.open(image_path)
+# st.sidebar.image(image,width=180)
 
-st.sidebar.markdown('# Eat Well Company')
-st.sidebar.markdown("""---""")
+# st.sidebar.markdown('# Eat Well Company')
+# st.sidebar.markdown("""---""")
 
 # filtro de preço
 st.sidebar.markdown("""

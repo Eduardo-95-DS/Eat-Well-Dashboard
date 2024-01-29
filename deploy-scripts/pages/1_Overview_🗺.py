@@ -15,12 +15,12 @@ df=df_raw.copy()
 
 # Barra lateral=====================================================================
 
-image_path='image/logo.jpg'
-image=Image.open(image_path)
-st.sidebar.image(image,width=180)
+# image_path='image/logo.jpg'
+# image=Image.open(image_path)
+# st.sidebar.image(image,width=180)
 
-st.sidebar.markdown('# Eat Well Company')
-st.sidebar.markdown("""---""")
+# st.sidebar.markdown('# Eat Well Company')
+# st.sidebar.markdown("""---""")
 
 # filtro de mapas
 st.sidebar.markdown('## Choose your Map')
