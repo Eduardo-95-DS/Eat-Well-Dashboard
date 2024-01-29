@@ -38,7 +38,8 @@ st.markdown('''
 Dashboard built to accompany the company's main metrics
 ### How to use it?   
 - Overview:   
-    - General metrics and maps for a geographical perspective
-
+    - General metrics and maps for a geographical perspective   
+- Country vision:   
+    - In depth metrics about the countries
 ''')
 
