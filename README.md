@@ -3,7 +3,9 @@
 # **1. Business problem**
 
 Eat Well Company is a restaurant marketplace with the main goal of facilitating the connection and negotiations between customers and restaurants.   
-The newly hired CEO requested a dashboard containing key information of the following questions, allowing him to better understand the company and to make strategical decisions.
+The newly hired CEO requested a dashboard containing key information of the following questions, allowing him to better understand the company and to make strategical decisions.  
+
+Therefore the goal of this project is to create a dashboard containing a set of tables and graphs that showcase the most important metrics derived from the requested questions.    
 
 **- Country:**
 
