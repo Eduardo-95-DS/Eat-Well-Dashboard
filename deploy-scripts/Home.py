@@ -34,10 +34,6 @@ st.markdown(
                 - https://www.linkedin.com/in/eduardo-rodrigues-ds/ 
         """)
 
-st.markdown(""" Dashboard built to accompany the company's main metrics   
-            #How to use it?   
-            - Overview:   
-                - General metrics and maps for a geographical perspective
-            
-            """)
+st.markdown('''Dashboard built to accompany the company's main metrics
+### How to use it? ''')
 
