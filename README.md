@@ -1,3 +1,6 @@
+
+![food](https://github.com/Eduardo-95-DS/Eat-Well-Dashboard/assets/95311171/6bec3243-e0d3-40ae-8a2a-f4a0f2f48610)
+
 # **Eat Well Dashboard**
 
 # **1. Business problem**
