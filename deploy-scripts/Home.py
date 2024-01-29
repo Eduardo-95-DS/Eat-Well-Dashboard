@@ -17,7 +17,7 @@ st.sidebar.markdown("""---""")
 st.write('# Eat Well Company Dashboard')
 
 st.markdown("""
-            Dashbord built to accompany the main metrics of the company.
+            Dashboard built to accompany the company's main metrics
 
             ### Ask for help
                 - https://www.linkedin.com/in/eduardo-rodrigues-ds/
