@@ -13,7 +13,7 @@ df_raw=cleaning(df_raw)
 
 df=df_raw.copy()
 
-st.set_page_config(page_title='Cuisine Vision',page_icon='🥘',layout='wide')
+st.set_page_config(page_title='Cuisine Vision',layout='wide')
 
 # Barra lateral=====================================================================
 image_path='image/logo.jpg'
