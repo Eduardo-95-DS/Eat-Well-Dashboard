@@ -68,7 +68,7 @@ Which cuisine type has the most restaurants that accept online orders and offer 
 
 The first step was to understand, clean, and analyze the dataset in order to answer the questions on a notebook; then, planning which information would go to the dashboard.     
 
-The following metrics were chosen for each vision of the business:   
+The following metrics were selected for each business aspect:   
 - Country:
   - N° of restaurants, n° of unique cuisines, average rating, average cost for two and price range.
 
