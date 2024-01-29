@@ -34,5 +34,10 @@ st.markdown(
                 - https://www.linkedin.com/in/eduardo-rodrigues-ds/ 
         """)
 
-st.markdown(""" # teste""")
+st.markdown("""Dashboard built to accompany the company's main metrics   
+            ### How to use it?   
+            - Overview:   
+                - General metrics and maps fo
+            
+            """)
 
