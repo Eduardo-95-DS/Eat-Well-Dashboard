@@ -18,15 +18,13 @@ st.write('# Eat Well Company Dashboard')
 
 st.markdown(
 	   """
-            Dashboard built to accompany the company's main metrics     
-            
-            ### How to use it?    
-            
+            Dashboard built to accompany the company's main metrics               
+            ### How to use it?               
             - Overview:
             	- General metrics and maps for a geographical perspective         
             - Country vision:
             	- In depth metrics about the countries	    
-	    - City vision:
+    	    - City vision:
             	- In depth metrics about the cities
             - Restaurant vision:
             	- In depth metrics about the restaurants	    
