@@ -34,6 +34,7 @@ st.markdown(
                 - https://www.linkedin.com/in/eduardo-rodrigues-ds/ 
         """)
 
-st.markdown('''Dashboard built to accompany the company's main metrics
+st.markdown('''
+Dashboard built to accompany the company's main metrics
 ### How to use it? ''')
 
