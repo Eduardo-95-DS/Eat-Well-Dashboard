@@ -17,8 +17,10 @@ st.sidebar.markdown("""---""")
 st.write('# Eat Well Company Dashboard')
 
 st.markdown("""
-            Dashboard built to accompany the company's main metrics
-            ### How to use it? 
+            Dashboard built to accompany the company's main metrics     
+            
+            ### How to use it?    
+            
             - Overview:
             	- General metrics and maps for a geographical perspective
             
@@ -32,7 +34,7 @@ st.markdown("""
             	- In depth metrics about the restaurants
 	    
 	    - Cuisine vision:
-            	- In depth metrics about the cuisines
+            	- In depth metrics about the cuisines      
 		
             ### Ask for help
                 - https://www.linkedin.com/in/eduardo-rodrigues-ds/
