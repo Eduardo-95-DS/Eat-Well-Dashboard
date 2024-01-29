@@ -40,6 +40,14 @@ Dashboard built to accompany the company's main metrics
 - Overview:   
     - General metrics and maps for a geographical perspective   
 - Country vision:   
-    - In depth metrics about the countries
+    - In depth metrics about the countries   
+- City vision:        
+    - In depth metrics about the cities   
+- Restaurant vision:    
+    - In depth metrics about the restaurants       	    
+- Cuisine vision:          
+    - In depth metrics about the cuisines          		
+### Ask for help   
+    - https://www.linkedin.com/in/eduardo-rodrigues-ds/ 
 ''')
 
