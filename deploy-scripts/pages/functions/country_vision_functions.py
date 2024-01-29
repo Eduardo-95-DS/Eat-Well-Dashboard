@@ -86,45 +86,45 @@ def price_range(df):
     
     st.plotly_chart(fig,use_container_width=True)
 
-def cuisine_country_proportion (df):
-    df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
-    df3=df2[['country','cuisine']].groupby('country').value_counts().reset_index()
+# def cuisine_country_proportion (df):
+#     df2=df.assign(cuisine=df['cuisines'].str.split(',')).explode('cuisine')
+#     df3=df2[['country','cuisine']].groupby('country').value_counts().reset_index()
     
-    # Calcular a soma total de cada grupo (país)
-    total_counts = df3.groupby('country')['count'].sum()
+#     # Calcular a soma total de cada grupo (país)
+#     total_counts = df3.groupby('country')['count'].sum()
     
-    # Adicionar uma nova coluna com a porcentagem
-    df3['percentage'] = df3.apply(lambda row: (row['count'] / total_counts[row['country']]) * 100, axis=1)
-    df3=df3.loc[df3.groupby('country')['count'].idxmax()].sort_values('percentage',ascending=True)
+#     # Adicionar uma nova coluna com a porcentagem
+#     df3['percentage'] = df3.apply(lambda row: (row['count'] / total_counts[row['country']]) * 100, axis=1)
+#     df3=df3.loc[df3.groupby('country')['count'].idxmax()].sort_values('percentage',ascending=True)
     
-    fig = px.bar(df3, x='percentage', y='country', text='cuisine',category_orders={'percentage': df3['percentage'].tolist()},
-                 labels={'percentage': 'Percentage (%)', 'country': 'Country'},
-                 height=600)
+#     fig = px.bar(df3, x='percentage', y='country', text='cuisine',category_orders={'percentage': df3['percentage'].tolist()},
+#                  labels={'percentage': 'Percentage (%)', 'country': 'Country'},
+#                  height=600)
     
-    # Personalizar layout
-    fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                          yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
+#     # Personalizar layout
+#     fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+#                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
 
-    st.plotly_chart(fig,use_container_width=True)
+#     st.plotly_chart(fig,use_container_width=True)
 
-def selected_cuisine_country_proportion (df3,cuisine1):
-    df4=df3.assign(cuisine=df3['cuisines'].str.split(',')).explode('cuisine')
-    df5=df4[['country','cuisine']].groupby('country').value_counts().reset_index()
+# def selected_cuisine_country_proportion (df3,cuisine1):
+#     df4=df3.assign(cuisine=df3['cuisines'].str.split(',')).explode('cuisine')
+#     df5=df4[['country','cuisine']].groupby('country').value_counts().reset_index()
     
-    df5['sum'] = df5.groupby('country')['count'].transform('sum')
-    df5=df5[df5['cuisine']==cuisine1]
-    df5['percentage'] = df5.apply(lambda row: (row['count'] *100) / row['sum'], axis=1)
-    df5=df5.sort_values('percentage',ascending=False)
+#     df5['sum'] = df5.groupby('country')['count'].transform('sum')
+#     df5=df5[df5['cuisine']==cuisine1]
+#     df5['percentage'] = df5.apply(lambda row: (row['count'] *100) / row['sum'], axis=1)
+#     df5=df5.sort_values('percentage',ascending=False)
     
-    fig = px.bar(df5, x='percentage', y='country',category_orders={'country': df5['country'].tolist()},
-                 labels={'percentage': 'Percentage (%)', 'country': 'Country'},
-                 height=600)
+#     fig = px.bar(df5, x='percentage', y='country',category_orders={'country': df5['country'].tolist()},
+#                  labels={'percentage': 'Percentage (%)', 'country': 'Country'},
+#                  height=600)
     
-    # Personalizar layout
-    fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
-                          yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
+#     # Personalizar layout
+#     fig.update_layout(xaxis=dict(title='Percentage (%)',title_font=dict(size=20)),yaxis=dict(title=''),xaxis_tickfont=dict(size=15), 
+#                           yaxis_tickfont=dict(size=15),height=500,margin=dict(t=0),showlegend=False)
 
-    st.plotly_chart(fig,use_container_width=True)
+#     st.plotly_chart(fig,use_container_width=True)
 
 
 

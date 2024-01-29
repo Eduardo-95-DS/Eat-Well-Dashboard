@@ -193,25 +193,10 @@ with st.container():
         average_cost_for_two(df)
 
 with st.container():
-    col1,col2=st.columns(2)
-    
-    with col1:
-        
-        st.markdown("<h3 style='text-align: center;'>Price range</h3>",unsafe_allow_html=True)
-
-        price_range(df)
             
-    with col2:
+    st.markdown("<h3 style='text-align: center;'>Price range</h3>",unsafe_allow_html=True)
 
-        st.markdown("<h3 style='text-align: center;'>Proportion</h3>",unsafe_allow_html=True)
-
-        if 'All' in cuisines or reset_button:
-        
-            cuisine_country_proportion(df)
-            
-        else:
-            
-            selected_cuisine_country_proportion(df3,cuisine1)
+    price_range(df)
 
 
 
